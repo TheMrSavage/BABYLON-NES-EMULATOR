@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.31.7)
+
+project(NES_emulator)
+
+include(FetchContent)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_subdirectory(cmake/dependencies/sdl3)
+add_subdirectory(cmake/dependencies/ImGui)
+add_subdirectory(cmake/libs/interface)
+
+add_executable(Nes src/main.cpp)
+
+target_include_directories(Nes PRIVATE src/libs)
+
+target_link_libraries(Nes PRIVATE InterfaceModule)
