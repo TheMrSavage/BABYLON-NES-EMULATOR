@@ -2,5 +2,5 @@
 
 int main() {
     Interface i;
-    i.start();
+    i.render();
 }
