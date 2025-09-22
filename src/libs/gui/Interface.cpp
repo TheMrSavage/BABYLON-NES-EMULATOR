@@ -7,6 +7,7 @@
 
 Interface::Interface() {
     setupSdl();
+    mainScreen = MainScreen(this->renderer);
     setupImGui();
 }
 
@@ -54,6 +55,7 @@ void Interface::setupImGui() {
     
     style.ScaleAllSizes(this->main_scale);
     style.FontScaleDpi = this->main_scale;
+    style.WindowPadding = ImVec2(0, 0);
 
     ImGui_ImplSDL3_InitForSDLRenderer(this->window, this->renderer);
     ImGui_ImplSDLRenderer3_Init(this->renderer);
@@ -74,9 +76,7 @@ void Interface::render() {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Test");
-        ImGui::Text("Some test text");
-        ImGui::End();
+        mainScreen.show();
 
         ImGui::Render();
         SDL_SetRenderScale(this->renderer, this->imguiIO.DisplayFramebufferScale.x, this->imguiIO.DisplayFramebufferScale.y);

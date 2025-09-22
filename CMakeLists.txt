@@ -8,7 +8,7 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(cmake/dependencies/sdl3)
 add_subdirectory(cmake/dependencies/ImGui)
-add_subdirectory(cmake/libs/interface)
+add_subdirectory(cmake/libs/gui)
 
 add_executable(Nes src/main.cpp)
 
