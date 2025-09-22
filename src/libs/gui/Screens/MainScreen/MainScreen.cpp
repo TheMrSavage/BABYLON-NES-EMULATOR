@@ -1,11 +1,16 @@
 #include "MainScreen.hpp"
-#include "SDL3/SDL_gpu.h"
-#include "SDL3/SDL_pixels.h"
-#include "SDL3/SDL_render.h"
 #include "imgui.h"
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <ios>
 #include <iostream>
+#include <iterator>
+#include <nfd.h>
+#include <vector>
 
 MainScreen::MainScreen(SDL_Renderer * interface_renderer) : INTERFACE_RENDERER(interface_renderer) {
     this->GAME_DRAW_PIXEL_MATRIX = SDL_CreateTexture(
@@ -18,12 +23,12 @@ MainScreen::MainScreen(SDL_Renderer * interface_renderer) : INTERFACE_RENDERER(i
 }
 
 void MainScreen::show() {
-    if (ImGui::BeginMainMenuBar()) {
+    if (showMenu && ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
             if (ImGui::MenuItem("Open file")) {
-                std::cout << "To do" << std::endl;
+                openFileFunction();
             }
-
+            
             ImGui::EndMenu();
         }
 
@@ -47,6 +52,7 @@ void MainScreen::show() {
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
+        }
         
         ImVec2 viewportWorkPos = ImGui::GetMainViewport()->WorkPos;
         
@@ -75,7 +81,9 @@ void MainScreen::show() {
         );
 
         ImGui::End();
-    }
+
+        if (ImGui::IsKeyReleased(ImGuiKey_Escape))
+            this->showMenu = !this->showMenu;
 }
 
 void MainScreen::randomizeMatrix() {
@@ -89,6 +97,56 @@ void MainScreen::randomizeMatrix() {
     }
 
     SDL_UnlockTexture(this->GAME_DRAW_PIXEL_MATRIX);
+}
+
+const std::vector<unsigned char> MainScreen::getRoomData() {
+    nfdchar_t * roomPath = nullptr;
+    nfdresult_t result = NFD_OpenDialog(nullptr, nullptr, &roomPath);
+
+    if ( result == NFD_OKAY) {
+        std::ifstream room(roomPath, std::ios::binary);
+        
+        if (room) {
+            const std::vector<unsigned char> roomData(std::istream_iterator<char>(room), {});
+
+            return roomData;
+        }
+    }
+    
+    return std::vector<unsigned char>();
+}
+
+void MainScreen::openFileFunction() {
+    const std::vector<unsigned char> roomData = getRoomData();
+
+    for (unsigned char d : roomData) {
+        std::cout <<  std::hex << std::setw(2) << (int)d << " ";
+    }
+    std::cout << std::endl;
+    
+    if (isValidRoom(roomData) ) {
+        std::cout << "VALID ROOM!";
+    }
+    else {
+        std::cout << "INVALID ROOM";
+    }
+    std::cout << std::endl;
+
+}
+
+// TODO: Validate not only the header, but total size and other aspects too...
+bool MainScreen::isValidRoom(const std::vector<unsigned char>& room) {
+    const std::vector<unsigned char> header= {
+        0x4e, // "N" 
+        0x45, // "E"
+        0x53, // "S"
+        0x1A}; // \x1A
+    
+    return std::equal(
+        room.begin(),
+        room.begin() + 3,
+        header.begin()
+    );
 }
 
 MainScreen::~MainScreen() {
