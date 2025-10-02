@@ -146,6 +146,7 @@ void Interface::showScreen(int i) {
     SDL_RenderPresent(sdl_data->renderer);   
 }
 
+// TODO: Use smart pointers insted of raw ones 
 Interface::~Interface() {
     for (ImGuiContext * context : this->contexts_vec) {
         ImGui::SetCurrentContext(context);
