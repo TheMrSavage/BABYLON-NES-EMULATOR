@@ -13,11 +13,16 @@
             float main_scale;
             bool debugFlag = false;
             ImGuiIO imguiIO;
+
+            // TODO: Make all vecs fixed size and create an enum for each screen 
             std::vector<SDL_DATA *> sdl_data_vec;
             std::vector<ImGuiContext *> contexts_vec;
             std::vector<Screen *> screens_vec;
+
             SDL_DATA * createSdlData(const char * windowName);    
             ImGuiContext * createImGuiContext(const char * windowName);
+            int pollScreenEvent();
+            void showScreen(int i);
         public:
             Interface();
             void render();
