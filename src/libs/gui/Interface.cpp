@@ -127,11 +127,12 @@ void Interface::render() {
 
 
 Interface::~Interface() {
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    
     for (ImGuiContext * context : this->contexts_vec) {
         ImGui::SetCurrentContext(context);
+
+        ImGui_ImplSDLRenderer3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+
         ImGui::DestroyContext();
     }
     
