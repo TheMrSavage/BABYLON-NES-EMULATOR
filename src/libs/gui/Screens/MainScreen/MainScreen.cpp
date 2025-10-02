@@ -12,7 +12,7 @@
 #include <nfd.h>
 #include <vector>
 
-MainScreen::MainScreen(SDL_Renderer * interface_renderer) : INTERFACE_RENDERER(interface_renderer) {
+MainScreen::MainScreen(SDL_Renderer * interface_renderer) : Screen(interface_renderer) {
     this->GAME_DRAW_PIXEL_MATRIX = SDL_CreateTexture(
             this->INTERFACE_RENDERER,
             SDL_PIXELFORMAT_RGBA8888,
@@ -118,6 +118,11 @@ const std::vector<unsigned char> MainScreen::getRoomData() {
 
 void MainScreen::openFileFunction() {
     const std::vector<unsigned char> roomData = getRoomData();
+    
+    if (roomData.empty()) {
+        std::cout << "EMPTY ROOM!" << std::endl;
+        return;
+    }
 
     for (unsigned char d : roomData) {
         std::cout <<  std::hex << std::setw(2) << (int)d << " ";
@@ -150,5 +155,5 @@ bool MainScreen::isValidRoom(const std::vector<unsigned char>& room) {
 }
 
 MainScreen::~MainScreen() {
-// SDL_DestroyTexture(this->GAME_DRAW_PIXEL_MATRIX);
+    SDL_DestroyTexture(this->GAME_DRAW_PIXEL_MATRIX);
 }
