@@ -2,7 +2,6 @@
     #define INTERFACE_H
     #include <SDL3/SDL.h>
     #include <vector>
-    #include "Screens/Screen.hpp"
     #include "imgui.h"
 
     typedef struct sdl_data SDL_DATA;
@@ -14,16 +13,14 @@
             float main_scale;
             bool debugFlag = false;
             ImGuiIO imguiIO;
-
+            
             // TODO: Make all vecs fixed size and create an enum for each screen 
             std::vector<SCREEN_DATA *> screen_data_vec;
-            // std::vector<SDL_DATA *> sdl_data_vec;
-            // std::vector<ImGuiContext *> contexts_vec;
-            // std::vector<Screen *> screens_vec;
 
             SDL_DATA * createSdlData(const char * windowName);    
             ImGuiContext * createImGuiContext();
-            template<typename T>
+            
+            template<class T>
             SCREEN_DATA * createScreenData(const char * windowName);
             int pollScreenEvent();
             void showScreen(int i);

@@ -34,7 +34,8 @@ Interface::Interface() {
     this->screen_data_vec.push_back(this->createScreenData<MainScreen>("LMAOO"));
 }
 
-template<typename T>
+// TODO: Really need to find a better way to pass class to function... Or find some way to restrict the template
+template<class T>
 SCREEN_DATA * Interface::createScreenData(const char * windowName) {
     SCREEN_DATA * screen_data = new SCREEN_DATA();
 
