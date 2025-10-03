@@ -1,6 +1,5 @@
-#include <gui/Interface.hpp>
+#include <controller/EmulatorController.hpp>
 
 int main() {
-    Interface i;
-    i.render();
+
 }

@@ -129,13 +129,15 @@ void MainScreen::openFileFunction() {
     }
     std::cout << std::endl;
     
-    if (isValidRoom(roomData) ) {
+    // Ignoring valid room for now because first we need to debug the CPU
+    /*if (isValidRoom(roomData) ) {
         std::cout << "VALID ROOM!";
     }
     else {
         std::cout << "INVALID ROOM";
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
+    
 
 }
 
