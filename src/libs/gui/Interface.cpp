@@ -14,6 +14,12 @@ struct sdl_data {
     SDL_Renderer* renderer;
 };
 
+struct screen_data {
+    SDL_DATA * sdl_data;
+    ImGuiContext * context;
+    Screen * screen;
+};
+
 Interface::Interface() {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -23,14 +29,26 @@ Interface::Interface() {
     this->main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 
     IMGUI_CHECKVERSION();
+    
+    this->screen_data_vec.push_back(this->createScreenData<MainScreen>("NES Emulator"));
+    this->screen_data_vec.push_back(this->createScreenData<MainScreen>("LMAOO"));
+}
 
-    this->contexts_vec.push_back(this->createImGuiContext("Nes Emulator"));
+template<typename T>
+SCREEN_DATA * Interface::createScreenData(const char * windowName) {
+    SCREEN_DATA * screen_data = new SCREEN_DATA();
+
+    ImGuiContext * context = this->createImGuiContext();
+    SDL_DATA * sdl_data = this->createSdlData(windowName);
     
-    this->screens_vec.push_back(new MainScreen(this->sdl_data_vec[0]->renderer));
-    
-    this->contexts_vec.push_back(this->createImGuiContext("LMAO"));
-    
-    this->screens_vec.push_back(new MainScreen(this->sdl_data_vec[1]->renderer));
+    ImGui_ImplSDL3_InitForSDLRenderer(sdl_data->window, sdl_data->renderer);
+    ImGui_ImplSDLRenderer3_Init(sdl_data->renderer);
+
+    screen_data->sdl_data = sdl_data;
+    screen_data->context = context;
+    screen_data->screen = new T(sdl_data->renderer);
+
+    return screen_data;
 }
 
 SDL_DATA * Interface::createSdlData(const char * windowName) {
@@ -61,15 +79,11 @@ SDL_DATA * Interface::createSdlData(const char * windowName) {
     return data;
 }
 
-ImGuiContext * Interface::createImGuiContext(const char* windowName) {
+ImGuiContext * Interface::createImGuiContext() {
     ImGuiContext * context = ImGui::CreateContext();
     
     ImGui::SetCurrentContext(context);
 
-    SDL_DATA * sdl_data = this->createSdlData(windowName);
-    
-    this->sdl_data_vec.push_back(sdl_data);
-    
     ImGuiIO context_io = ImGui::GetIO();
 
     this->imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -82,9 +96,6 @@ ImGuiContext * Interface::createImGuiContext(const char* windowName) {
     style.FontScaleDpi = this->main_scale;
     style.WindowPadding = ImVec2(0, 0);
 
-    ImGui_ImplSDL3_InitForSDLRenderer(sdl_data->window, sdl_data->renderer);
-    ImGui_ImplSDLRenderer3_Init(sdl_data->renderer);
-
     return context;
 }
 
@@ -92,7 +103,7 @@ void Interface::render() {
     while (true) {
         if (this->pollScreenEvent() == -1) return;
         
-        for (int i = 0; i < this->screens_vec.size(); i++) {
+        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
             this->showScreen(i);           
         }
     }
@@ -102,15 +113,14 @@ void Interface::render() {
 int Interface::pollScreenEvent() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        for (int i = 0; i < this->contexts_vec.size(); i++) {
-            ImGuiContext * context = this->contexts_vec[i];
+        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
+            ImGuiContext * context = this->screen_data_vec[i]->context;
             ImGui::SetCurrentContext(context);
             ImGui_ImplSDL3_ProcessEvent(&event);
         }
         
-        for (int i = 0; i < this->contexts_vec.size(); i++) {
-            ImGuiContext * context = this->contexts_vec[i];
-            SDL_DATA * sdl_data = this->sdl_data_vec[i];
+        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
+            SDL_DATA * sdl_data = this->screen_data_vec[i]->sdl_data;
             if ( (event.type == SDL_EVENT_QUIT) 
                 || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED 
                     && event.window.windowID == SDL_GetWindowID(sdl_data->window)
@@ -125,9 +135,9 @@ int Interface::pollScreenEvent() {
 }
 
 void Interface::showScreen(int i) {
-    ImGuiContext * context = this->contexts_vec[i];
-    Screen * screen = this->screens_vec[i];
-    SDL_DATA * sdl_data = this->sdl_data_vec[i];
+    ImGuiContext * context = this->screen_data_vec[i]->context;
+    Screen * screen = this->screen_data_vec[i]->screen;
+    SDL_DATA * sdl_data = this->screen_data_vec[i]->sdl_data;
     ImGui::SetCurrentContext(context);
 
     ImGuiIO imguiIO = ImGui::GetIO();
@@ -148,23 +158,23 @@ void Interface::showScreen(int i) {
 
 // TODO: Use smart pointers insted of raw ones 
 Interface::~Interface() {
-    for (ImGuiContext * context : this->contexts_vec) {
+    for (SCREEN_DATA * screen_data : this->screen_data_vec) {
+        ImGuiContext * context = screen_data->context;
+        SDL_DATA * sdl_data = screen_data->sdl_data;
+        Screen * screen = screen_data->screen;
+
         ImGui::SetCurrentContext(context);
 
         ImGui_ImplSDLRenderer3_Shutdown();
         ImGui_ImplSDL3_Shutdown();
 
         ImGui::DestroyContext();
-    }
-    
-    for (SDL_DATA * sdl_data : this->sdl_data_vec) {
+
         SDL_DestroyRenderer(sdl_data->renderer);
         SDL_DestroyWindow(sdl_data->window);
-    }
-    
-    SDL_Quit();
 
-    for (Screen * screen : this->screens_vec) {
         delete screen;
     }
+       
+    SDL_Quit();
 }
