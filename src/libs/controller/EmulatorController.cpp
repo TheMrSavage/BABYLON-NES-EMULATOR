@@ -1,6 +1,7 @@
 #include "EmulatorController.hpp"
 #include "events.hpp"
 #include <any>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
@@ -46,12 +47,18 @@ void EmulatorController::start() {
 }
 
 void EmulatorController::handleRoom(const std::vector<unsigned char>& room) {
+    for (unsigned char d : room) {
+        std::cout <<  std::hex << std::setw(2) << (int)d << " ";
+    }
+    std::cout << std::endl;
+
     if (!this->isValidRoom(room)) {
         std::cout << "[-] Invalid room!" << std::endl;
         return;
     }
 
     std::cout << "[+] Valid room!" << std::endl;
+
 }
 
 // TODO: Validate not only the header, but total size and other aspects too...

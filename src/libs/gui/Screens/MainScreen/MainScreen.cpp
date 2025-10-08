@@ -112,6 +112,8 @@ std::vector<unsigned char> MainScreen::openFileFunction() {
     if ( result == NFD_OKAY) {
         std::ifstream room(roomPath, std::ios::binary);
         
+        free(roomPath);
+
         if (room) {
             const std::vector<unsigned char> roomData(std::istream_iterator<char>(room), {});
 
@@ -120,21 +122,6 @@ std::vector<unsigned char> MainScreen::openFileFunction() {
     }
     
     return std::vector<unsigned char>();
-
-    /*for (unsigned char d : roomData) {
-        std::cout <<  std::hex << std::setw(2) << (int)d << " ";
-    }
-    std::cout << std::endl;
-    
-    // Ignoring valid room for now because first we need to debug the CPU
-    if (isValidRoom(roomData) ) {
-        std::cout << "VALID ROOM!";
-    }
-    else {
-        std::cout << "INVALID ROOM";
-    }
-    std::cout << std::endl;*/
-
 }
 
 MainScreen::~MainScreen() {
