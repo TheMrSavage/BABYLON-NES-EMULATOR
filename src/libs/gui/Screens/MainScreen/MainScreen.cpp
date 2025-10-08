@@ -1,18 +1,18 @@
 #include "MainScreen.hpp"
 #include "imgui.h"
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
-#include <iomanip>
 #include <ios>
 #include <iostream>
 #include <iterator>
 #include <nfd.h>
+#include <queue>
 #include <vector>
 
-MainScreen::MainScreen(SDL_Renderer * interface_renderer) : Screen(interface_renderer) {
+MainScreen::MainScreen(SDL_Renderer * interface_renderer,
+        std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool) {
     this->GAME_DRAW_PIXEL_MATRIX = SDL_CreateTexture(
             this->INTERFACE_RENDERER,
             SDL_PIXELFORMAT_RGBA8888,
@@ -26,7 +26,13 @@ void MainScreen::show() {
     if (showMenu && ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
             if (ImGui::MenuItem("Open file")) {
-                openFileFunction();
+                std::vector<unsigned char> roomFile = openFileFunction();
+                
+                struct event_return event = {
+                    INTERFACE_ROOM_OPEN_EVENT,
+                    roomFile
+                };
+                this->pushQueueElement(event);
             }
             
             ImGui::EndMenu();
@@ -99,7 +105,7 @@ void MainScreen::randomizeMatrix() {
     SDL_UnlockTexture(this->GAME_DRAW_PIXEL_MATRIX);
 }
 
-const std::vector<unsigned char> MainScreen::getRoomData() {
+std::vector<unsigned char> MainScreen::openFileFunction() {
     nfdchar_t * roomPath = nullptr;
     nfdresult_t result = NFD_OpenDialog(nullptr, nullptr, &roomPath);
 
@@ -114,46 +120,21 @@ const std::vector<unsigned char> MainScreen::getRoomData() {
     }
     
     return std::vector<unsigned char>();
-}
 
-void MainScreen::openFileFunction() {
-    const std::vector<unsigned char> roomData = getRoomData();
-    
-    if (roomData.empty()) {
-        std::cout << "EMPTY ROOM!" << std::endl;
-        return;
-    }
-
-    for (unsigned char d : roomData) {
+    /*for (unsigned char d : roomData) {
         std::cout <<  std::hex << std::setw(2) << (int)d << " ";
     }
     std::cout << std::endl;
     
     // Ignoring valid room for now because first we need to debug the CPU
-    /*if (isValidRoom(roomData) ) {
+    if (isValidRoom(roomData) ) {
         std::cout << "VALID ROOM!";
     }
     else {
         std::cout << "INVALID ROOM";
     }
     std::cout << std::endl;*/
-    
 
-}
-
-// TODO: Validate not only the header, but total size and other aspects too...
-bool MainScreen::isValidRoom(const std::vector<unsigned char>& room) {
-    const std::vector<unsigned char> header= {
-        0x4e, // "N" 
-        0x45, // "E"
-        0x53, // "S"
-        0x1A}; // \x1A
-    
-    return std::equal(
-        room.begin(),
-        room.begin() + 3,
-        header.begin()
-    );
 }
 
 MainScreen::~MainScreen() {

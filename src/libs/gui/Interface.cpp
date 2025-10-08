@@ -3,6 +3,7 @@
 #include "Screens/Screen.hpp"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "events.hpp"
 #include "imgui.h"
 #include <cstdlib>
 #include <iostream>
@@ -20,7 +21,7 @@ struct screen_data {
     Screen * screen;
 };
 
-Interface::Interface() {
+Interface::Interface(std::queue<event_return>& event_pool) : event_pool(event_pool) {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         std::cout << "Error: SDL_Init(): " << SDL_GetError() << std::endl;
@@ -29,7 +30,7 @@ Interface::Interface() {
     this->main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 
     IMGUI_CHECKVERSION();
-    
+
     this->screen_data_vec.push_back(this->createScreenData<MainScreen>("NES Emulator"));
     this->screen_data_vec.push_back(this->createScreenData<MainScreen>("LMAOO"));
 }
@@ -47,7 +48,7 @@ SCREEN_DATA * Interface::createScreenData(const char * windowName) {
 
     screen_data->sdl_data = sdl_data;
     screen_data->context = context;
-    screen_data->screen = new T(sdl_data->renderer);
+    screen_data->screen = new T(sdl_data->renderer, this->event_pool);
 
     return screen_data;
 }
@@ -101,16 +102,19 @@ ImGuiContext * Interface::createImGuiContext() {
 }
 
 void Interface::render() {
-    while (true) {
-        if (this->pollScreenEvent() == -1) return;
-        
-        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
-            this->showScreen(i);           
-        }
+    if (this->pollScreenEvent() == -1) { 
+        this->event_pool.push(event_return{INTERFACE_CLOSE_EVENT});
+
+        return;
     }
+
+    for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
+            this->showScreen(i);           
+    }
+
+    return;
 }
 
-// TODO: create a enum for each possible state (idk if theres more than quit, but anyway is better)
 int Interface::pollScreenEvent() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

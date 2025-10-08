@@ -1,7 +1,9 @@
 #ifndef INTERFACE_H
     #define INTERFACE_H
     #include <SDL3/SDL.h>
+#include <queue>
     #include <vector>
+    #include <events.hpp>
     #include "imgui.h"
 
     typedef struct sdl_data SDL_DATA;
@@ -24,8 +26,9 @@
             SCREEN_DATA * createScreenData(const char * windowName);
             int pollScreenEvent();
             void showScreen(int i);
+            std::queue<event_return>& event_pool;
         public:
-            Interface();
+            Interface(std::queue<event_return>& event_pool);
             void render();
             ~Interface();
     };
