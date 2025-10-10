@@ -46,6 +46,7 @@ Interface::Interface(std::queue<event_return>& event_pool) : event_pool(event_po
         );
 }
 
+// TODO: Remove duplicated code
 // TODO: Really need to find a better way to pass class to function... Or find some way to restrict the template
 template<class T>
 SCREEN_DATA * Interface::createScreenData(const char * windowName, bool& boolFlag) {
@@ -139,6 +140,7 @@ void Interface::render() {
         return;
     }
     
+    // TODO: Put the first conditional in a function   
     for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
             if (i == DEBUGGER_SCREEN_ENUM) {
                 if (!this->debugFlag) {
