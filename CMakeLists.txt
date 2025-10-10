@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.31.7)
 
-project(NES_emulator)
+project(BABYLON)
 
 include(FetchContent)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,8 +17,8 @@ endif()
 add_subdirectory(cmake/dependencies)
 add_subdirectory(cmake/libs)
 
-add_executable(Nes_Emulator src/main.cpp)
+add_executable(BABYLON src/main.cpp)
 
-target_include_directories(Nes_Emulator PUBLIC src/libs)
+target_include_directories(BABYLON PUBLIC src/libs)
 
-target_link_libraries(Nes_Emulator PRIVATE Controller)
+target_link_libraries(BABYLON PRIVATE Controller)

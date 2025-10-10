@@ -33,9 +33,15 @@ void EmulatorController::start() {
                 case INTERFACE_ROOM_OPEN_EVENT:
                     if (!interface_event_return.data.has_value()) {
                         std::cout << "[-] NO DATA!" << std::endl;
+                        break;
                     }
 
                     std::vector<unsigned char> room =  std::any_cast<std::vector<unsigned char>>(interface_event_return.data.value());
+                    if (room.empty()) {
+                        std::cout << "[-] NO DATA!" << std::endl;
+                        break;
+                    }
+
                     this->handleRoom(room);
 
                     break;
@@ -51,13 +57,14 @@ void EmulatorController::handleRoom(const std::vector<unsigned char>& room) {
         std::cout <<  std::hex << std::setw(2) << (int)d << " ";
     }
     std::cout << std::endl;
-
-    if (!this->isValidRoom(room)) {
+    
+    // As we want to debug 6502 CPU first we don't need (and don't want) to validate the file header
+    /*if (!this->isValidRoom(room)) {
         std::cout << "[-] Invalid room!" << std::endl;
         return;
     }
 
-    std::cout << "[+] Valid room!" << std::endl;
+    std::cout << "[+] Valid room!" << std::endl;*/
 
 }
 
@@ -71,7 +78,7 @@ bool EmulatorController::isValidRoom(const std::vector<unsigned char>& room) {
     
     return std::equal(
         room.begin(),
-        room.begin() + 3,
+        room.begin() + 4,
         header.begin()
     );
 }

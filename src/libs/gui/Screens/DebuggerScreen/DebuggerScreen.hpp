@@ -3,14 +3,14 @@
     
     #include "../Screen.hpp"
     #include "SDL3/SDL_render.h"
-#include <queue>
-class DebuggerScreen : Screen { 
+    #include <queue>
+class DebuggerScreen : public Screen { 
         private: 
             SDL_Renderer * INTERFACE_RENDERER;
         public:
             DebuggerScreen(SDL_Renderer * interface_renderer,
-                    std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool){};
-            ~DebuggerScreen();
+                    std::queue<event_return>& event_pool);
+            ~DebuggerScreen(){};
             void show() override;
     };
 #endif

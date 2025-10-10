@@ -1,6 +1,7 @@
 #ifndef INTERFACE_H
     #define INTERFACE_H
     #include <SDL3/SDL.h>
+#include <array>
 #include <queue>
     #include <vector>
     #include <events.hpp>
@@ -17,7 +18,12 @@
             ImGuiIO imguiIO;
             
             // TODO: Make all vecs fixed size and create an enum for each screen 
-            std::vector<SCREEN_DATA *> screen_data_vec;
+            enum SCREENS_ENUM {
+                MAIN_SCREEN_ENUM,
+                DEBUGGER_SCREEN_ENUM
+            };
+
+            std::array<SCREEN_DATA *, 2> screen_data_array;
 
             SDL_DATA * createSdlData(const char * windowName);    
             ImGuiContext * createImGuiContext();

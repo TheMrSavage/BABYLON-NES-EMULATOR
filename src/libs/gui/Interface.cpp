@@ -4,6 +4,7 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include "events.hpp"
+#include "gui/Screens/DebuggerScreen/DebuggerScreen.hpp"
 #include "imgui.h"
 #include <cstdlib>
 #include <iostream>
@@ -31,8 +32,9 @@ Interface::Interface(std::queue<event_return>& event_pool) : event_pool(event_po
 
     IMGUI_CHECKVERSION();
 
-    this->screen_data_vec.push_back(this->createScreenData<MainScreen>("NES Emulator"));
-    this->screen_data_vec.push_back(this->createScreenData<MainScreen>("LMAOO"));
+    this->screen_data_array[MAIN_SCREEN_ENUM] = (this->createScreenData<MainScreen>("BABYLON - An NES emulator"));
+    
+    this->screen_data_array[DEBUGGER_SCREEN_ENUM] = (this->createScreenData<DebuggerScreen>("Debugger"));
 }
 
 // TODO: Really need to find a better way to pass class to function... Or find some way to restrict the template
@@ -108,7 +110,7 @@ void Interface::render() {
         return;
     }
 
-    for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
+    for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
             this->showScreen(i);           
     }
 
@@ -118,18 +120,18 @@ void Interface::render() {
 int Interface::pollScreenEvent() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
-            ImGuiContext * context = this->screen_data_vec[i]->context;
+        for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
+            ImGuiContext * context = this->screen_data_array[i]->context;
             ImGui::SetCurrentContext(context);
             ImGui_ImplSDL3_ProcessEvent(&event);
         }
         
-        for (long unsigned int i = 0; i < this->screen_data_vec.size(); i++) {
-            SDL_DATA * sdl_data = this->screen_data_vec[i]->sdl_data;
+        for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
+            SDL_DATA * sdl_data = this->screen_data_array[i]->sdl_data;
             if ( (event.type == SDL_EVENT_QUIT) 
                 || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED 
                     && event.window.windowID == SDL_GetWindowID(sdl_data->window)
-                    ) 
+                    && i == MAIN_SCREEN_ENUM) 
             ) {
                 return -1;
             }
@@ -140,9 +142,9 @@ int Interface::pollScreenEvent() {
 }
 
 void Interface::showScreen(int i) {
-    ImGuiContext * context = this->screen_data_vec[i]->context;
-    Screen * screen = this->screen_data_vec[i]->screen;
-    SDL_DATA * sdl_data = this->screen_data_vec[i]->sdl_data;
+    ImGuiContext * context = this->screen_data_array[i]->context;
+    Screen * screen = this->screen_data_array[i]->screen;
+    SDL_DATA * sdl_data = this->screen_data_array[i]->sdl_data;
     ImGui::SetCurrentContext(context);
 
     ImGuiIO imguiIO = ImGui::GetIO();
@@ -163,7 +165,7 @@ void Interface::showScreen(int i) {
 
 // TODO: Use smart pointers insted of raw ones 
 Interface::~Interface() {
-    for (SCREEN_DATA * screen_data : this->screen_data_vec) {
+    for (SCREEN_DATA * screen_data : this->screen_data_array) {
         ImGuiContext * context = screen_data->context;
         SDL_DATA * sdl_data = screen_data->sdl_data;
         Screen * screen = screen_data->screen;
