@@ -2,6 +2,7 @@
     #define INTERFACE_H
     #include <SDL3/SDL.h>
 #include <array>
+#include <optional>
 #include <queue>
     #include <vector>
     #include <events.hpp>
@@ -29,7 +30,16 @@
             ImGuiContext * createImGuiContext();
             
             template<class T>
-            SCREEN_DATA * createScreenData(const char * windowName);
+            SCREEN_DATA * createScreenData(
+                    const char * windowName, 
+                    bool& boolFlag
+                );
+            
+            template<class T>
+            SCREEN_DATA * createScreenData(
+                    const char * windowName 
+            );
+
             int pollScreenEvent();
             void showScreen(int i);
             std::queue<event_return>& event_pool;

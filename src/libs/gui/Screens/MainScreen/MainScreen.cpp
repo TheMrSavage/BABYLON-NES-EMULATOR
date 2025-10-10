@@ -11,8 +11,10 @@
 #include <queue>
 #include <vector>
 
-MainScreen::MainScreen(SDL_Renderer * interface_renderer,
-        std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool) {
+MainScreen::MainScreen(
+        SDL_Renderer * interface_renderer,
+        std::queue<event_return>& event_pool,
+        bool& showDebugger) : Screen(interface_renderer, event_pool), showDebugger(showDebugger) {
     this->GAME_DRAW_PIXEL_MATRIX = SDL_CreateTexture(
             this->INTERFACE_RENDERER,
             SDL_PIXELFORMAT_RGBA8888,
@@ -52,7 +54,9 @@ void MainScreen::show() {
             }
             
             if (ImGui::MenuItem("Debbuging")) {
-                std::cout << "To do" << std::endl;
+                if (!this->showDebugger) {
+                    this->showDebugger = true;
+                }   
             }
 
             ImGui::EndMenu();

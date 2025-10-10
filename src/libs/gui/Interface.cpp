@@ -1,4 +1,5 @@
 #include "Interface.hpp"
+#include "SDL3/SDL_video.h"
 #include "Screens/MainScreen/MainScreen.hpp"
 #include "Screens/Screen.hpp"
 #include "backends/imgui_impl_sdl3.h"
@@ -6,8 +7,11 @@
 #include "events.hpp"
 #include "gui/Screens/DebuggerScreen/DebuggerScreen.hpp"
 #include "imgui.h"
+#include <algorithm>
+#include <any>
 #include <cstdlib>
 #include <iostream>
+#include <optional>
 #include <ostream>
 
 struct sdl_data {
@@ -32,9 +36,33 @@ Interface::Interface(std::queue<event_return>& event_pool) : event_pool(event_po
 
     IMGUI_CHECKVERSION();
 
-    this->screen_data_array[MAIN_SCREEN_ENUM] = (this->createScreenData<MainScreen>("BABYLON - An NES emulator"));
+    this->screen_data_array[MAIN_SCREEN_ENUM] = this->createScreenData<MainScreen>(
+            "BABYLON - An NES emulator",
+            this->debugFlag
+        );
     
-    this->screen_data_array[DEBUGGER_SCREEN_ENUM] = (this->createScreenData<DebuggerScreen>("Debugger"));
+    this->screen_data_array[DEBUGGER_SCREEN_ENUM] = this->createScreenData<DebuggerScreen>(
+            "Debugger" 
+        );
+}
+
+// TODO: Really need to find a better way to pass class to function... Or find some way to restrict the template
+template<class T>
+SCREEN_DATA * Interface::createScreenData(const char * windowName, bool& boolFlag) {
+    SCREEN_DATA * screen_data = new SCREEN_DATA();
+
+    ImGuiContext * context = this->createImGuiContext();
+    SDL_DATA * sdl_data = this->createSdlData(windowName);
+    
+    ImGui_ImplSDL3_InitForSDLRenderer(sdl_data->window, sdl_data->renderer);
+    ImGui_ImplSDLRenderer3_Init(sdl_data->renderer);
+
+    screen_data->sdl_data = sdl_data;
+    screen_data->context = context;
+
+    screen_data->screen = new T(sdl_data->renderer, this->event_pool, boolFlag);
+
+    return screen_data;
 }
 
 // TODO: Really need to find a better way to pass class to function... Or find some way to restrict the template
@@ -50,6 +78,7 @@ SCREEN_DATA * Interface::createScreenData(const char * windowName) {
 
     screen_data->sdl_data = sdl_data;
     screen_data->context = context;
+
     screen_data->screen = new T(sdl_data->renderer, this->event_pool);
 
     return screen_data;
@@ -105,12 +134,19 @@ ImGuiContext * Interface::createImGuiContext() {
 
 void Interface::render() {
     if (this->pollScreenEvent() == -1) { 
-        this->event_pool.push(event_return{INTERFACE_CLOSE_EVENT});
+        this->event_pool.push(event_return{INTERFACE_CLOSE_EVENT, std::nullopt});
 
         return;
     }
-
+    
     for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
+            if (i == DEBUGGER_SCREEN_ENUM) {
+                if (!this->debugFlag) {
+                    continue;
+                }
+
+                SDL_ShowWindow(this->screen_data_array[i]->sdl_data->window);
+            }
             this->showScreen(i);           
     }
 
@@ -121,6 +157,8 @@ int Interface::pollScreenEvent() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         for (long unsigned int i = 0; i < this->screen_data_array.size(); i++) {
+            if (i == DEBUGGER_SCREEN_ENUM && !this->debugFlag) continue;
+
             ImGuiContext * context = this->screen_data_array[i]->context;
             ImGui::SetCurrentContext(context);
             ImGui_ImplSDL3_ProcessEvent(&event);
@@ -131,9 +169,17 @@ int Interface::pollScreenEvent() {
             if ( (event.type == SDL_EVENT_QUIT) 
                 || (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED 
                     && event.window.windowID == SDL_GetWindowID(sdl_data->window)
-                    && i == MAIN_SCREEN_ENUM) 
+                ) 
             ) {
-                return -1;
+                switch (i) {
+                    case MAIN_SCREEN_ENUM:
+                        return -1;
+
+                    case DEBUGGER_SCREEN_ENUM:
+                        SDL_HideWindow(this->screen_data_array[i]->sdl_data->window);
+                        this->debugFlag = false;
+                        break;
+                }
             }
         }
     }

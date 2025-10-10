@@ -10,10 +10,11 @@
             static const int GAME_DRAW_PIXEL_MATRIX_WIDTH = 256;
             static const int GAME_DRAW_PIXEL_MATRIX_HEIGHT = 240;
             bool showMenu = true;
+            bool& showDebugger;
             static std::vector<unsigned char> openFileFunction();
             void randomizeMatrix();
         public:
-            MainScreen(SDL_Renderer * interface_renderer, std::queue<event_return>& event_pool);
+            MainScreen(SDL_Renderer * interface_renderer, std::queue<event_return>& event_pool, bool& showDebugger);
             ~MainScreen();
             void show() override;
     };
