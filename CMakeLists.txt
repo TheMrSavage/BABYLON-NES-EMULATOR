@@ -17,6 +17,7 @@ endif()
 add_subdirectory(cmake/dependencies)
 add_subdirectory(cmake/libs)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 add_executable(BABYLON src/main.cpp)
 
 target_include_directories(BABYLON PUBLIC src/libs)

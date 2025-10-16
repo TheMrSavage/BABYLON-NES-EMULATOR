@@ -4,6 +4,7 @@
 #include <array>
 #include <optional>
 #include <queue>
+#include <string>
     #include <vector>
     #include <events.hpp>
     #include "imgui.h"
@@ -17,7 +18,8 @@
             float main_scale;
             bool debugFlag = false;
             ImGuiIO imguiIO;
-            
+            const inline static std::string FONT_PATH = "resources/fonts/PixelatedElegance/PixelatedEleganceRegular-ovyAA.ttf";
+
             // TODO: Make all vecs fixed size and create an enum for each screen 
             enum SCREENS_ENUM {
                 MAIN_SCREEN_ENUM,

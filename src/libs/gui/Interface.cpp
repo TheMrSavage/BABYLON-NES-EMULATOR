@@ -7,12 +7,11 @@
 #include "events.hpp"
 #include "gui/Screens/DebuggerScreen/DebuggerScreen.hpp"
 #include "imgui.h"
-#include <algorithm>
-#include <any>
 #include <cstdlib>
 #include <iostream>
 #include <optional>
 #include <ostream>
+#include <filesystem>
 
 struct sdl_data {
     SDL_Surface * winSurface;
@@ -120,8 +119,17 @@ ImGuiContext * Interface::createImGuiContext() {
 
     ImGuiIO context_io = ImGui::GetIO();
 
-    this->imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    
+    context_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        
+    if (!std::filesystem::exists(this->FONT_PATH)) {
+       context_io.Fonts->AddFontDefault();
+    } 
+    else {
+        if (!context_io.Fonts->AddFontFromFileTTF(this->FONT_PATH.c_str(), 12.0f)) {
+            context_io.Fonts->AddFontDefault();
+        }
+    }
+
     ImGui::StyleColorsDark();
     
     ImGuiStyle& style = ImGui::GetStyle();
