@@ -2,3 +2,5 @@ build/
 testcase/
 compile_commands.json
 .cache/
+BABYLON
+imgui.ini

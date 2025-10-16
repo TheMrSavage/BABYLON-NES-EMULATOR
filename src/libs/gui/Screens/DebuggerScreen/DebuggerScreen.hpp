@@ -7,6 +7,12 @@
 class DebuggerScreen : public Screen { 
         private: 
             SDL_Renderer * INTERFACE_RENDERER;
+
+            void openCPUDebugger();
+            void openAPUDebugger();
+            void openPPUDebugger();
+            void showRoomMemory();
+        
         public:
             DebuggerScreen(SDL_Renderer * interface_renderer,
                     std::queue<event_return>& event_pool);

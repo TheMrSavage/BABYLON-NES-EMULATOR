@@ -25,6 +25,10 @@ MainScreen::MainScreen(
 }
 
 void MainScreen::show() {
+    float padding = 5;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(padding, padding));
+
     if (showMenu && ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Game")) {
             if (ImGui::MenuItem("Open file")) {
@@ -64,6 +68,8 @@ void MainScreen::show() {
         ImGui::EndMainMenuBar();
         }
         
+        ImGui::PopStyleVar(2);
+
         ImVec2 viewportWorkPos = ImGui::GetMainViewport()->WorkPos;
         
         // viewportWorkPos[1] += 10;
@@ -102,8 +108,11 @@ void MainScreen::randomizeMatrix() {
 
     SDL_LockTexture(this->GAME_DRAW_PIXEL_MATRIX, NULL, (void **)&pixels, &pitch);
     
-    for (int i = 0; i < pitch * this->GAME_DRAW_PIXEL_MATRIX_HEIGHT; i++) {
-     pixels[i] = rand() % 255;   
+    for (int i = 0; i < pitch * this->GAME_DRAW_PIXEL_MATRIX_HEIGHT; i += 4) {
+        pixels[i] = 0xFF;   
+        pixels[i + 1] = rand() % 255;   
+        pixels[i + 2] = rand() % 255;   
+        pixels[i + 3] = rand() % 255;   
     }
 
     SDL_UnlockTexture(this->GAME_DRAW_PIXEL_MATRIX);

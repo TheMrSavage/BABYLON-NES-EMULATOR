@@ -213,7 +213,7 @@ void Interface::showScreen(int i) {
     
     ImGui::Render();
     SDL_SetRenderScale(sdl_data->renderer, imguiIO.DisplayFramebufferScale.x, imguiIO.DisplayFramebufferScale.y);
-    SDL_SetRenderDrawColorFloat(sdl_data->renderer,  CLEAR_COLOR.x, CLEAR_COLOR.y, CLEAR_COLOR.z, CLEAR_COLOR.w);
+    SDL_SetRenderDrawColorFloat(sdl_data->renderer,  CLEAR_COLOR.x / 255, CLEAR_COLOR.y / 255, CLEAR_COLOR.z / 255, CLEAR_COLOR.w);
     SDL_RenderClear(sdl_data->renderer);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), sdl_data->renderer);
     SDL_RenderPresent(sdl_data->renderer);   
