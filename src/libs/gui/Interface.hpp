@@ -43,9 +43,18 @@
             int pollScreenEvent();
             void showScreen(int i);
             std::queue<event_return>& event_pool;
+
         public:
             Interface(std::queue<event_return>& event_pool);
             void render();
+            void setDebuggerScreenCpuInfo(
+                const uint16_t& cpuPc,
+                const uint8_t&  cpuSp,
+                const uint8_t&  cpuAcc,
+                const uint8_t&  cpuIdX,
+                const uint8_t&  cpuIdY,
+                const uint8_t&  cpuP
+            );
             ~Interface();
     };
 #endif

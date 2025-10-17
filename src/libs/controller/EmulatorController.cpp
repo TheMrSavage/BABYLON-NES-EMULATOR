@@ -1,12 +1,17 @@
 #include "EmulatorController.hpp"
 #include "events.hpp"
+#include "nes/rp2a03/cpu/Cpu_6502.hpp"
 #include <any>
+#include <cstdint>
+#include <future>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
+#include <thread>
 #include <vector>
 
 EmulatorController::EmulatorController() {
-    this->nes = new Nes;
+    // this->nes = new Nes;
 }
 
 // TODO: Put smart pointers here too...
@@ -36,7 +41,7 @@ void EmulatorController::start() {
                         break;
                     }
 
-                    std::vector<unsigned char> room =  std::any_cast<std::vector<unsigned char>>(interface_event_return.data.value());
+                    std::vector<uint8_t> room =  std::any_cast<std::vector<unsigned char>>(interface_event_return.data.value());
                     if (room.empty()) {
                         std::cout << "[-] NO DATA!" << std::endl;
                         break;
@@ -52,8 +57,8 @@ void EmulatorController::start() {
     }
 }
 
-void EmulatorController::handleRoom(const std::vector<unsigned char>& room) {
-    for (unsigned char d : room) {
+void EmulatorController::handleRoom(const std::vector<uint8_t>& room) {
+    for (uint8_t d : room) {
         std::cout <<  std::hex << std::setw(2) << (int)d << " ";
     }
     std::cout << std::endl;
@@ -65,12 +70,15 @@ void EmulatorController::handleRoom(const std::vector<unsigned char>& room) {
     }
 
     std::cout << "[+] Valid room!" << std::endl;*/
-
+    
+    std::thread cpuTest(&EmulatorController::mockCPU, this, room);
+    
+    cpuTest.detach();
 }
 
 // TODO: Validate not only the header, but total size and other aspects too...
-bool EmulatorController::isValidRoom(const std::vector<unsigned char>& room) {
-    const std::vector<unsigned char> header = {
+bool EmulatorController::isValidRoom(const std::vector<uint8_t>& room) {
+    const std::vector<uint8_t> header = {
         0x4e, // "N" 
         0x45, // "E"
         0x53, // "S"
@@ -81,4 +89,26 @@ bool EmulatorController::isValidRoom(const std::vector<unsigned char>& room) {
         room.begin() + 4,
         header.begin()
     );
+}
+
+// This should be (obviously) removed after all CPU tests
+void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
+    std::vector<uint8_t> mockedMemory(0xFFFF);
+    
+    std::copy(room.begin(), room.end(), std::back_inserter(mockedMemory));
+
+    CPU cpu(mockedMemory);
+    
+    this->interface->setDebuggerScreenCpuInfo(      
+        cpu.returnPc(),
+        cpu.returnSp(),
+        cpu.returnAcc(),
+        cpu.returnIdX(),
+        cpu.returnIdY(),
+        cpu.returnP()
+    );
+
+    while (true) {
+    
+    }
 }

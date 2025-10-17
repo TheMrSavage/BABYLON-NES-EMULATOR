@@ -6,6 +6,23 @@ DebuggerScreen::DebuggerScreen(SDL_Renderer * interface_renderer,
 
 }
 
+void DebuggerScreen::setCpuDebuggerInfo(   
+                const uint16_t& cpuPc,
+                const uint8_t&  cpuSp,
+                const uint8_t&  cpuAcc,
+                const uint8_t&  cpuIdX,
+                const uint8_t&  cpuIdY,
+                const uint8_t&  cpuP) {
+    this->cpuDebuggerInfo = new CpuDebuggerInfo{
+            cpuPc,
+            cpuSp,
+            cpuAcc,
+            cpuIdX,
+            cpuIdY,
+            cpuP
+    };
+}
+
 void DebuggerScreen::show(){
     float padding = 5;
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -26,12 +43,12 @@ void DebuggerScreen::openCPUDebugger() {
     ImGui::Button(">");
     
     ImGui::Text("Current instruction: ");
-    ImGui::Text("Program counter: ");
-    ImGui::Text("Stack pointer: ");
-    ImGui::Text("Accumulator: ");
-    ImGui::Text("Index Register X: ");
-    ImGui::Text("Index Register Y: ");
-    ImGui::Text("Processor Status Register (P): ");
+    ImGui::Text("Program counter: %d", this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);
+    ImGui::Text("Stack pointer: %d",   this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuSp);
+    ImGui::Text("Accumulator: %d",     this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuAcc);
+    ImGui::Text("Index Register X: %d",this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdX);
+    ImGui::Text("Index Register Y: %d",this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdY);
+    ImGui::Text("Processor Status Register (P): %d", this->cpuDebuggerInfo == nullptr ? 0 : this->cpuDebuggerInfo->cpuP);
 
     ImGui::End();
 }

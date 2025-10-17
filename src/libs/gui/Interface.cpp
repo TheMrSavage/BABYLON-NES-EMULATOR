@@ -241,3 +241,20 @@ Interface::~Interface() {
        
     SDL_Quit();
 }
+
+void Interface::setDebuggerScreenCpuInfo (
+                const uint16_t& cpuPc,
+                const uint8_t&  cpuSp,
+                const uint8_t&  cpuAcc,
+                const uint8_t&  cpuIdX,
+                const uint8_t&  cpuIdY,
+                const uint8_t&  cpuP) {
+    ((DebuggerScreen *)this->screen_data_array[DEBUGGER_SCREEN_ENUM]->screen)->setCpuDebuggerInfo(
+        cpuPc,
+        cpuSp,
+        cpuAcc,
+        cpuIdX,
+        cpuIdY,
+        cpuP
+    );
+}

@@ -12,6 +12,7 @@
             std::queue<event_return> interface_event_pool;
             void handleRoom(const std::vector<unsigned char>& room);
             static bool isValidRoom(const std::vector<unsigned char>& room);
+            void mockCPU(const std::vector<unsigned char>& room);
         public:
             void start();
             EmulatorController();
