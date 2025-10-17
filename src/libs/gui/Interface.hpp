@@ -16,7 +16,7 @@
             float main_scale;
             bool debugFlag = false;
             ImGuiIO imguiIO;
-            const inline static std::string FONT_PATH = "resources/fonts/PixelatedElegance/PixelatedEleganceRegular-ovyAA.ttf";
+            const inline static std::string FONT_PATH = "resources/fonts/DepartureMono/DepartureMonoNerdFontMono-Regular.otf";
 
             // TODO: Make all vecs fixed size and create an enum for each screen 
             enum SCREENS_ENUM {

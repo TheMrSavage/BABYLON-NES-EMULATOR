@@ -47,9 +47,9 @@ void DebuggerScreen::show(){
 void DebuggerScreen::openCPUDebugger() {
     ImGui::Begin("CPU Debugger");
     
-    ImGui::Button("+ | -");
+    ImGui::Button("");
     ImGui::SameLine();
-    ImGui::Button(">");
+    ImGui::Button("");
     
     ImGui::Text("Current instruction: ");
     ImGui::Text("Program counter: %d", this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);

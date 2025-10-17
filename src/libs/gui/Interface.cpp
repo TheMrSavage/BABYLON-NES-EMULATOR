@@ -125,7 +125,7 @@ ImGuiContext * Interface::createImGuiContext() {
        context_io.Fonts->AddFontDefault();
     } 
     else {
-        if (!context_io.Fonts->AddFontFromFileTTF(this->FONT_PATH.c_str(), 12.0f)) {
+        if (!context_io.Fonts->AddFontFromFileTTF(this->FONT_PATH.c_str(), 24.0f)) {
             context_io.Fonts->AddFontDefault();
         }
     }
