@@ -51,7 +51,7 @@ void DebuggerScreen::openCPUDebugger() {
     ImGui::SameLine();
     ImGui::Button("");
     
-    ImGui::Text("Current instruction: ");
+    ImGui::Text("Current instruction: %s", this->getCurrentInstructionString());
     ImGui::Text("Program counter: %d", this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);
     ImGui::Text("Stack pointer: %d",   this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuSp);
     ImGui::Text("Accumulator: %d",     this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuAcc);
@@ -60,6 +60,20 @@ void DebuggerScreen::openCPUDebugger() {
     ImGui::Text("Processor Status Register (P): %d", this->cpuDebuggerInfo == nullptr ? 0 : this->cpuDebuggerInfo->cpuP);
 
     ImGui::End();
+}
+
+const char * DebuggerScreen::getCurrentInstructionString() {
+    if (this->cpuDebuggerInfo == nullptr) {
+        return "NO CPU ATTACHED";
+    }
+
+    uint8_t opcode = this->cpuDebuggerInfo->cpuMemory[this->cpuDebuggerInfo->cpuPc];
+
+    if (this->opcodesToInstructionsMap.find(opcode) == this->opcodesToInstructionsMap.end()) {
+        return "NOT IMPLEMENTED";
+    }
+
+    return this->opcodesToInstructionsMap.at(opcode);
 }
 
 // TODO
