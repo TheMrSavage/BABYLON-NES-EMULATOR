@@ -1,6 +1,22 @@
 #ifndef INSTRUCTIONS_OPCODE_ENUM
     #define INSTRUCTIONS_OPCODE_ENUM
     // Thanks to: https://www.nesdev.org/obelisk-6502-guide/reference.html
+    enum ADDRESSING_MODE_ENUM {
+        ABSOLUTE_X,
+        ABSOLUTE,
+        INDIRECT_X,
+        ZERO_PAGE_Y,
+        IMMEDIATE,
+        IMPLIED,
+        ZERO_PAGE,
+        INDIRECT,
+        RELATIVE,
+        ACCUMULATOR,
+        INDIRECT_Y,
+        ZERO_PAGE_X,
+        ABSOLUTE_Y,
+    };
+
     enum INSTRUCTIONS_OPCODE_ENUM {
         // Add with Carry
         ADC_IMMEDIATE = 0x69,
