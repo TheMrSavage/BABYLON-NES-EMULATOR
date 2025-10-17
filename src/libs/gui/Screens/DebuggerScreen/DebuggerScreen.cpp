@@ -1,8 +1,6 @@
 #include "DebuggerScreen.hpp"
 #include "imgui.h"
 #include <cstdint>
-#include <iostream>
-#include <ostream>
 #include <vector>
 
 DebuggerScreen::DebuggerScreen(SDL_Renderer * interface_renderer,
@@ -51,13 +49,13 @@ void DebuggerScreen::openCPUDebugger() {
     ImGui::SameLine();
     ImGui::Button("");
     
-    ImGui::Text("Current instruction: %s", this->getCurrentInstructionString());
-    ImGui::Text("Program counter: %d", this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);
-    ImGui::Text("Stack pointer: %d",   this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuSp);
-    ImGui::Text("Accumulator: %d",     this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuAcc);
-    ImGui::Text("Index Register X: %d",this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdX);
-    ImGui::Text("Index Register Y: %d",this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdY);
-    ImGui::Text("Processor Status Register (P): %d", this->cpuDebuggerInfo == nullptr ? 0 : this->cpuDebuggerInfo->cpuP);
+    ImGui::Text("Current instruction: %s",      this->getCurrentInstructionString());
+    ImGui::Text("Program counter:     0x%04x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);
+    ImGui::Text("Stack pointer:       0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuSp);
+    ImGui::Text("Accumulator:         0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuAcc);
+    ImGui::Text("Index Register X:    0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdX);
+    ImGui::Text("Index Register Y:    0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdY);
+    ImGui::Text("Status Register (P): 0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuP);
 
     ImGui::End();
 }
