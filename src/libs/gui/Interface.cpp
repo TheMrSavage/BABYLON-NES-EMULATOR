@@ -248,13 +248,16 @@ void Interface::setDebuggerScreenCpuInfo (
                 const uint8_t&  cpuAcc,
                 const uint8_t&  cpuIdX,
                 const uint8_t&  cpuIdY,
-                const uint8_t&  cpuP) {
+                const uint8_t&  cpuP,
+                const std::vector<uint8_t>& memory
+                ) {
     ((DebuggerScreen *)this->screen_data_array[DEBUGGER_SCREEN_ENUM]->screen)->setCpuDebuggerInfo(
         cpuPc,
         cpuSp,
         cpuAcc,
         cpuIdX,
         cpuIdY,
-        cpuP
+        cpuP,
+        memory
     );
 }

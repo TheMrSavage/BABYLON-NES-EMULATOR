@@ -1,4 +1,6 @@
 #include "Cpu_6502.hpp"
+#include <cstdint>
+#include <vector>
 
 uint16_t& CPU::returnPc() {
     return this->pc;
@@ -22,4 +24,8 @@ uint8_t& CPU::returnIdY() {
 
 uint8_t& CPU::returnP() {
     return this->p;
+}
+
+const std::vector<uint8_t>& CPU::returnMemory() {
+    return this->memory;
 }

@@ -22,6 +22,7 @@
             uint8_t& returnIdX();
             uint8_t& returnIdY();
             uint8_t& returnP();
+            const std::vector<uint8_t>& returnMemory();
 
             CPU(std::vector<uint8_t>& memory) : memory(memory){};
     };

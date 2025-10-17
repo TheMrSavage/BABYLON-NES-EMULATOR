@@ -1,8 +1,11 @@
 #include "EmulatorController.hpp"
 #include "events.hpp"
 #include "nes/rp2a03/cpu/Cpu_6502.hpp"
+#include <algorithm>
 #include <any>
+#include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <future>
 #include <iomanip>
 #include <iostream>
@@ -95,7 +98,12 @@ bool EmulatorController::isValidRoom(const std::vector<uint8_t>& room) {
 void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
     std::vector<uint8_t> mockedMemory(0xFFFF);
     
-    std::copy(room.begin(), room.end(), std::back_inserter(mockedMemory));
+    if (room.size() > 0xFFFF) {
+        std::cout << "Invalid room size!" << std::endl;
+        return;
+    }
+
+    std::copy(room.begin(), room.end(), mockedMemory.begin());
 
     CPU cpu(mockedMemory);
     
@@ -105,10 +113,15 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
         cpu.returnAcc(),
         cpu.returnIdX(),
         cpu.returnIdY(),
-        cpu.returnP()
+        cpu.returnP(),
+        cpu.returnMemory()
     );
 
     while (true) {
-    
-    }
+        uint16_t& pc = cpu.returnPc();
+        
+        pc = std::rand() % 0xFFFF;
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
 }

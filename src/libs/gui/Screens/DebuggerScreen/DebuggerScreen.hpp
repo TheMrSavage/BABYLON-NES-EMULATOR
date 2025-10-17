@@ -15,6 +15,7 @@
               const uint8_t&  cpuIdX;
               const uint8_t&  cpuIdY;
               const uint8_t&  cpuP;
+              const std::vector<uint8_t>& cpuMemory;
             }CpuDebuggerInfo;
             
             CpuDebuggerInfo * cpuDebuggerInfo = nullptr;
@@ -35,7 +36,8 @@
                const uint8_t&  cpuAcc,
                const uint8_t&  cpuIdX,
                const uint8_t&  cpuIdY,
-               const uint8_t&  cpuP
+               const uint8_t&  cpuP,
+               const std::vector<uint8_t>& cpuMemory
             );
     };
 #endif
