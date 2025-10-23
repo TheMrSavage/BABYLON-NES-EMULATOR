@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <vector>
 
+#define OnOffString(x) \
+    (x) ? ("On") : ("Off")
+
 DebuggerScreen::DebuggerScreen(SDL_Renderer * interface_renderer,
                     std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool) {
 
@@ -56,8 +59,32 @@ void DebuggerScreen::openCPUDebugger() {
     ImGui::Text("Index Register X:    0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdX);
     ImGui::Text("Index Register Y:    0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuIdY);
     ImGui::Text("Status Register (P): 0x%02x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuP);
+    
+    this->showStatusRegisterInfo();
 
     ImGui::End();
+}
+
+void DebuggerScreen::showStatusRegisterInfo () {
+    uint8_t statusRegister = this->cpuDebuggerInfo == nullptr ? 0 : this->cpuDebuggerInfo->cpuP;
+
+    uint8_t carry               = statusRegister & 0b00000001; 
+    uint8_t zero                = statusRegister & 0b00000010; 
+    uint8_t interruptDisable    = statusRegister & 0b00000100; 
+    uint8_t decimal             = statusRegister & 0b00001000; 
+    uint8_t bFlag               = statusRegister & 0b00010000; 
+    uint8_t overflow            = statusRegister & 0b01000000; 
+    uint8_t negative            = statusRegister & 0b10000000; 
+    
+    ImGui::TextWrapped("Carry Flag: %s | Zero flag: %s | Interrupt Disable flag: %s | Decimal flag: %s | B Flag: %s | Overflow flag: %s | Negative flag: %s" ,
+            OnOffString(carry),
+            OnOffString(zero),
+            OnOffString(interruptDisable),
+            OnOffString(decimal),
+            OnOffString(bFlag),
+            OnOffString(overflow),
+            OnOffString(negative)
+        );
 }
 
 const char * DebuggerScreen::getCurrentInstructionString() {

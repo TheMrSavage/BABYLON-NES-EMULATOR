@@ -29,7 +29,7 @@
             void openPPUDebugger();
             void showRoomMemory();
             const char * getCurrentInstructionString();
-
+            void showStatusRegisterInfo();
             const static inline std::unordered_map<uint8_t, const char *> opcodesToInstructionsMap = {
                 {ADC_IMMEDIATE, "ADC_IMMEDIATE"},
                 {ADC_ZERO_PAGE, "ADC_ZERO_PAGE"},
