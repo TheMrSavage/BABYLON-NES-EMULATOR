@@ -61,7 +61,6 @@ void EmulatorController::start() {
                     break;
                 }
                 
-                // TODO: This solution is laggy. Need to find a way to made it instantly (or close) 
                 case INTERFACE_NEXT_STEP_DEBUGGER: {
                     this->execNextStep = true;   
                     break;
@@ -138,6 +137,7 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
             this->execNextStep = false;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        if (this->stepByStepDebugger) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        else std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }
