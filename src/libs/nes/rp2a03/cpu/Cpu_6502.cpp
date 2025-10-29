@@ -39,7 +39,7 @@ uint8_t CPU::fetchNextByte() {
 
 // TODO: Implement addressing modes and return the properly address specified by it
 uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM) {
-
+    return this->fetchNextByte();
 }
 
 // TODO: Again, this should be replaced with a proper bus
@@ -811,7 +811,8 @@ int CPU::executeNextInstruction() {
             return 2; 
 
         default:
-            throw std::runtime_error("Invalid opcode. Exiting...");
+            return 0;
+            // throw std::runtime_error("Invalid opcode. Exiting...");
     }
 }
 

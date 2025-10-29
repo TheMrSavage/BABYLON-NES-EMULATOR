@@ -8,6 +8,8 @@
         INTERFACE_CLOSE_EVENT,
         INTERFACE_ROOM_OPEN_EVENT,
         INTERFACE_CHANGE_DEBUGGER_STATE,
+        INTERFACE_STEP_BY_STEP_DEBUGGER,
+        INTERFACE_NEXT_STEP_DEBUGGER
     };
     
     // TODO: Refactor this to remove the std::any to a template (much more secure).

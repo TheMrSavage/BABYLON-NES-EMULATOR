@@ -14,8 +14,6 @@
             uint8_t p;
             const std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
 
-            int executeNextInstruction();
-            
             uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM);
             uint8_t fetchByteAt(uint16_t address);
             uint8_t fetchNextByte();
@@ -85,6 +83,8 @@
             uint8_t& returnIdY();
             uint8_t& returnP();
             const std::vector<uint8_t>& returnMemory();
+            
+            int executeNextInstruction();
 
             CPU(std::vector<uint8_t>& memory) : memory(memory){};
     };

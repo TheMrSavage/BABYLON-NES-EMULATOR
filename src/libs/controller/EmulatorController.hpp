@@ -13,6 +13,9 @@
             void handleRoom(const std::vector<unsigned char>& room);
             static bool isValidRoom(const std::vector<unsigned char>& room);
             void mockCPU(const std::vector<unsigned char>& room);
+
+            bool stepByStepDebugger = false;
+            bool execNextStep = false;
         public:
             void start();
             EmulatorController();

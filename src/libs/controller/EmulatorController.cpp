@@ -34,11 +34,12 @@ void EmulatorController::start() {
             EVENT_ENUM interface_event = interface_event_return.e;
 
             switch (interface_event) {
-                case INTERFACE_CLOSE_EVENT:
+                case INTERFACE_CLOSE_EVENT : {
                     return;
                     break;
+                }
 
-                case INTERFACE_ROOM_OPEN_EVENT:
+                case INTERFACE_ROOM_OPEN_EVENT: {
                     if (!interface_event_return.data.has_value()) {
                         std::cout << "[-] NO DATA!" << std::endl;
                         break;
@@ -53,6 +54,18 @@ void EmulatorController::start() {
                     this->handleRoom(room);
 
                     break;
+                }
+                
+                case INTERFACE_STEP_BY_STEP_DEBUGGER: {
+                    this->stepByStepDebugger = !this->stepByStepDebugger;
+                    break;
+                }
+                
+                // TODO: This solution is laggy. Need to find a way to made it instantly (or close) 
+                case INTERFACE_NEXT_STEP_DEBUGGER: {
+                    this->execNextStep = true;   
+                    break;
+                }
             }
         }
 
@@ -116,12 +129,15 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
         cpu.returnP(),
         cpu.returnMemory()
     );
-
+    
+    int cycles = 0;
     while (true) {
-        uint16_t& pc = cpu.returnPc();
         
-        pc = std::rand() % 0xFFFF;
-        
+        if ( !this->stepByStepDebugger || (this->stepByStepDebugger && this->execNextStep) ) {
+            cycles = cpu.executeNextInstruction();
+            this->execNextStep = false;
+        }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }

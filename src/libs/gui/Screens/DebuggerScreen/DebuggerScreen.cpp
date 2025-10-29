@@ -1,4 +1,5 @@
 #include "DebuggerScreen.hpp"
+#include "events.hpp"
 #include "imgui.h"
 #include <cstdint>
 #include <vector>
@@ -48,9 +49,23 @@ void DebuggerScreen::show(){
 void DebuggerScreen::openCPUDebugger() {
     ImGui::Begin("CPU Debugger");
     
-    ImGui::Button("");
+    if (ImGui::Button("")) {
+        event_return stepByStep = {
+            INTERFACE_STEP_BY_STEP_DEBUGGER,
+            nullptr
+        };
+
+        this->pushQueueElement(stepByStep);
+    }
     ImGui::SameLine();
-    ImGui::Button("");
+    if (ImGui::Button("")) {
+        event_return nextStep = {
+            INTERFACE_NEXT_STEP_DEBUGGER,
+            nullptr
+        };
+
+        this->pushQueueElement(nextStep);
+    }
     
     ImGui::Text("Current instruction: %s",      this->getCurrentInstructionString());
     ImGui::Text("Program counter:     0x%04x",  this->cpuDebuggerInfo == nullptr ? 0 :  this->cpuDebuggerInfo->cpuPc);
