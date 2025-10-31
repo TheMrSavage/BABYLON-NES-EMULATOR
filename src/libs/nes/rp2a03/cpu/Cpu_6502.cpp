@@ -37,7 +37,8 @@ uint8_t CPU::fetchNextByte() {
     return data;
 }
 
-// TODO: Implement addressing modes and return the properly address specified by it
+// DONE: Implement addressing modes and return the properly address specified by it
+// TODO: Figure out how to verify if there's any pagecrossing in *PAGE*/INDIRECT_* instructions. Maybe reference-value return? I think it's a good approach
 uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
     uint16_t address = 0x0000;
 
@@ -59,26 +60,31 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         // So, literally the adress is just the next byte. 
         // I mean, i can put address as 0x0000 and use fetchNextByte, but i think this way it'll be more clear. 
         case IMMEDIATE : {
-            address = ++(this->pc);
+            address = (this->pc++);
             break;
         }
-
+        
+        // As obelisk guide says: "An instruction using zero page addressing mode has only an 8 bit address operand."
         case ZERO_PAGE : {
+            address = this->fetchNextByte(); 
             break;
         }
-
+        
+        // " The address calculation wraps around if the sum of the base address and the register exceed $FF. If we repeat the last example but with $FF in the X register then the accumulator will be loaded from $007F (e.g. $80 + $FF => $7F) and not $017F."
         case ZERO_PAGE_X : {
+            address = (this->fetchNextByte() + this->idX) & 0xFF;
             break;
         }
         
         case ZERO_PAGE_Y : {
+            address = (this->fetchNextByte() + this->idY) & 0xFF;
             break;
         }
         
         // As obelisk guide says: "Relative addressing mode is used by branch instructions (e.g. BEQ, BNE, etc.) which contain a signed 8 bit relative offset (e.g. -128 to +127) which is added to program counter if the condition is true."
         // So, again, i just need to take the next adresses, but, in instructions, i need to do the sum logic in PC
         case RELATIVE : {
-            address = ++(this->pc);
+            address = (this->pc++);
             break;
         }
         
@@ -86,41 +92,79 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         // Now things got interesting, i need to get the two part of adresses and put them together.
         // And, remember, 6502 is little endian
         case ABSOLUTE : {
-            uint8_t rightBits = this->fetchNextByte();
-            uint8_t leftBits = this->fetchNextByte();
+            uint8_t LSB = this->fetchNextByte();
+            uint8_t MSB = this->fetchNextByte();
 
-            address = (leftBits << 8) | rightBits;
+            address = (MSB << 8) | LSB;
             break;
         }
 
         case ABSOLUTE_X : {
+            uint8_t LSB = this->fetchNextByte();
+            uint8_t MSB = this->fetchNextByte();
+
+            address = ( (MSB << 8) | LSB) + this->idX;
+
             break;
         }
 
         case ABSOLUTE_Y : {
+            uint8_t LSB = this->fetchNextByte();
+            uint8_t MSB = this->fetchNextByte();
+
+            address = ( (MSB << 8) | LSB) + this->idY;
+
             break;
         }
         
         // As obelisk guide says: "The instruction contains a 16 bit address which identifies the location of the least significant byte of another 16 bit memory address which is the real target of the instruction."
-        // So, again, same logic as absolute, but in instruction logic, we need to fetch the byte at position and position +1 to get the effective address
+        // So, again, same logic as absolute, but in instruction logic, we need to fetch the byte at position and position +1 to get the effective address.
+        // BTW, this have a strange behavior. The +1 sum must be done *just* in least significant byte. So, for example, if we have 0xC0FF, and try to read the next byte, the CPU will try to read at 0xC000 insted of 0xC1000.
+        // And thanks gemini for this info, it probably avoided a lot of work
         case INDIRECT : {
-            uint8_t rightBits = this->fetchNextByte();
-            uint8_t leftBits = this->fetchNextByte();
+            uint8_t LSB = this->fetchNextByte();
+            uint8_t MSB = this->fetchNextByte();
+            
+            uint16_t intermediaryAddressLSB = (MSB << 8) | LSB;
+            uint16_t intermediaryAddressMSB = (MSB << 8) | ( (LSB + 1) & 0xFF);
+            
+            uint8_t finalLSB = this->fetchByteAt(intermediaryAddressLSB);
+            uint8_t finalMSB = this->fetchByteAt(intermediaryAddressMSB);
 
-            address = (leftBits << 8) | rightBits;
+            address = (finalMSB << 8) | finalLSB;
+
             break;
         }
         
+        // As obelisk guide says: "Indexed indirect addressing is normally used in conjunction with a table of address held on zero page. The address of the table is taken from the instruction and the X register added to it (with zero page wrap around) to give the location of the least significant byte of the target address."
+        // This is *not* intuitive, because normal indirect can take *any* address.
         case INDIRECT_X : {
+            uint8_t zeroPageAdress = (this->fetchNextByte() + this->idX) & 0xFF; // Not necessary, but this maybe be more legible 
+            
+            uint8_t LSB = this->fetchByteAt(zeroPageAdress);
+            uint8_t MSB = this->fetchByteAt( (zeroPageAdress + 1) & 0xFF);
+            
+            address = (MSB << 8) | LSB;
+
             break;
         }
-
+        
+        // As obelisk guide says: "Indirect indirect addressing is the most common indirection mode used on the 6502. In instruction contains the zero page location of the least significant byte of 16 bit address. The Y register is dynamically added to this value to generated the actual target address for operation."
+        // So, it's basically same logic as X, but added *before*
+        // One interesting this: This don't have the same bug as indirect
         case INDIRECT_Y : {
+            uint8_t zeroPageAdress = this->fetchNextByte(); 
+            
+            uint8_t LSB = this->fetchByteAt(zeroPageAdress);
+            uint8_t MSB = this->fetchByteAt( (zeroPageAdress + 1) & 0xFF);
+            
+            address = ( (MSB << 8) | LSB) + this->idY;
+
             break;
         }
 
         default : {
-            throw new std::runtime_error("Illegal adressing mode");
+            throw std::runtime_error("Illegal adressing mode");
         }
     }
 
@@ -902,8 +946,7 @@ int CPU::executeNextInstruction() {
 }
 
 // All instructions below
-// TODO: There's some instructions that recive an address and other then recive a data... With time i change the signature of
-//    functions to match each case, but i want to have the proper skeleton for now
+// TODO: There's some instructions that recive an address and other then recive a data... With time i change the signature of functions to match each case, but i want to have the proper skeleton for now
 
 //TODO: Implement
 void CPU::ADC(uint16_t data){}
@@ -987,7 +1030,9 @@ void CPU::INX(uint16_t data){}
 void CPU::INY(uint16_t data){}
 
 //TODO: Implement
-void CPU::JMP(uint16_t data){}
+void CPU::JMP(uint16_t finalAddress){
+    this->pc = finalAddress;
+}
 
 //TODO: Implement
 void CPU::JSR(uint16_t data){}
