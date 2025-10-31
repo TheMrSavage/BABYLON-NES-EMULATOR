@@ -38,8 +38,93 @@ uint8_t CPU::fetchNextByte() {
 }
 
 // TODO: Implement addressing modes and return the properly address specified by it
-uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM) {
-    return this->fetchNextByte();
+uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
+    uint16_t address = 0x0000;
+
+    switch (adressingMode) {
+        
+        // The source/destiny is implicit in operation 
+        case IMPLIED : {
+            address = 0x0000;
+            break;
+        }
+        
+        // Again, here the destiny is accumulator and the rest is implicit in operation
+        case ACCUMULATOR : {
+            address = 0x0000;
+            break;
+        }
+        
+        // As obelisk guide says: "Immediate addressing allows the programmer to directly specify an 8 bit constant within the instruction. It is indicated by a '#' symbol followed by an numeric expression."
+        // So, literally the adress is just the next byte. 
+        // I mean, i can put address as 0x0000 and use fetchNextByte, but i think this way it'll be more clear. 
+        case IMMEDIATE : {
+            address = ++(this->pc);
+            break;
+        }
+
+        case ZERO_PAGE : {
+            break;
+        }
+
+        case ZERO_PAGE_X : {
+            break;
+        }
+        
+        case ZERO_PAGE_Y : {
+            break;
+        }
+        
+        // As obelisk guide says: "Relative addressing mode is used by branch instructions (e.g. BEQ, BNE, etc.) which contain a signed 8 bit relative offset (e.g. -128 to +127) which is added to program counter if the condition is true."
+        // So, again, i just need to take the next adresses, but, in instructions, i need to do the sum logic in PC
+        case RELATIVE : {
+            address = ++(this->pc);
+            break;
+        }
+        
+        // As obelisk guide says: "Instructions using absolute addressing contain a full 16 bit address to identify the target location."
+        // Now things got interesting, i need to get the two part of adresses and put them together.
+        // And, remember, 6502 is little endian
+        case ABSOLUTE : {
+            uint8_t rightBits = this->fetchNextByte();
+            uint8_t leftBits = this->fetchNextByte();
+
+            address = (leftBits << 8) | rightBits;
+            break;
+        }
+
+        case ABSOLUTE_X : {
+            break;
+        }
+
+        case ABSOLUTE_Y : {
+            break;
+        }
+        
+        // As obelisk guide says: "The instruction contains a 16 bit address which identifies the location of the least significant byte of another 16 bit memory address which is the real target of the instruction."
+        // So, again, same logic as absolute, but in instruction logic, we need to fetch the byte at position and position +1 to get the effective address
+        case INDIRECT : {
+            uint8_t rightBits = this->fetchNextByte();
+            uint8_t leftBits = this->fetchNextByte();
+
+            address = (leftBits << 8) | rightBits;
+            break;
+        }
+        
+        case INDIRECT_X : {
+            break;
+        }
+
+        case INDIRECT_Y : {
+            break;
+        }
+
+        default : {
+            throw new std::runtime_error("Illegal adressing mode");
+        }
+    }
+
+    return address;
 }
 
 // TODO: Again, this should be replaced with a proper bus
