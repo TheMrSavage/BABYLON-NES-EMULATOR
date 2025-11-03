@@ -345,23 +345,19 @@ int CPU::executeNextInstruction() {
             return 2; // (+1 if branch succeeds +2 if to a new page)
                       
         case CLC_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->CLC(addressToFetchData);
+            this->CLC();
             return 2; 
                       
         case CLD_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->CLD(addressToFetchData);
+            this->CLD();
             return 2; 
                       
         case CLI_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->CLI(addressToFetchData);
+            this->CLI();
             return 2; 
                       
         case CLV_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->CLV(addressToFetchData);
+            this->CLV();
             return 2; 
                       
         case CMP_IMMEDIATE:
@@ -455,13 +451,11 @@ int CPU::executeNextInstruction() {
             return 7; 
                       
         case DEX_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->DEX(addressToFetchData);
+            this->DEX();
             return 2; 
                       
         case DEY_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->DEY(addressToFetchData);
+            this->DEY();
             return 2; 
                       
         case EOR_IMMEDIATE:
@@ -525,13 +519,11 @@ int CPU::executeNextInstruction() {
             return 7; 
                       
         case INX_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->INX(addressToFetchData);
+            this->INX();
             return 2; 
                       
         case INY_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->INY(addressToFetchData);
+            this->INY();
             return 2; 
                       
         case JMP_ABSOLUTE:
@@ -665,8 +657,7 @@ int CPU::executeNextInstruction() {
             return 7; 
                       
         case NOP_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->NOP(addressToFetchData);
+            this->NOP();
             return 2; 
                       
         case ORA_IMMEDIATE:
@@ -830,18 +821,15 @@ int CPU::executeNextInstruction() {
             return 5; // (+1 if page crossed)
                       
         case SEC_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->SEC(addressToFetchData);
+            this->SEC();
             return 2; 
                       
         case SED_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->SED(addressToFetchData);
+            this->SED();
             return 2; 
                       
         case SEI_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->SEI(addressToFetchData);
+            this->SEI();
             return 2; 
                       
         case STA_ZERO_PAGE:
@@ -910,13 +898,11 @@ int CPU::executeNextInstruction() {
             return 4; 
                       
         case TAX_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TAX(addressToFetchData);
+            this->TAX();
             return 2; 
                       
         case TAY_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TAY(addressToFetchData);
+            this->TAY();
             return 2; 
                       
         case TSX_IMPLIED:
@@ -925,8 +911,7 @@ int CPU::executeNextInstruction() {
             return 2; 
                       
         case TXA_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TXA(addressToFetchData);
+            this->TXA();
             return 2; 
                       
         case TXS_IMPLIED:
@@ -935,8 +920,7 @@ int CPU::executeNextInstruction() {
             return 2; 
                       
         case TYA_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TYA(addressToFetchData);
+            this->TYA();
             return 2; 
 
         default:
@@ -987,17 +971,29 @@ void CPU::BVC(uint16_t data){}
 //TODO: Implement
 void CPU::BVS(uint16_t data){}
 
-//TODO: Implement
-void CPU::CLC(uint16_t data){}
+// Done
+// "Set the carry flag to zero."
+void CPU::CLC(){
+    this->p &= 0b11111110;
+}
 
-//TODO: Implement
-void CPU::CLD(uint16_t data){}
+// Done
+// "Sets the decimal mode flag to zero."
+void CPU::CLD(){
+    this->p &= 0b11110111;
+}
 
-//TODO: Implement
-void CPU::CLI(uint16_t data){}
+// Done
+// "Clears the interrupt disable flag allowing normal interrupt requests to be serviced."
+void CPU::CLI(){
+    this->p &= 0b11111011;
+}
 
-//TODO: Implement
-void CPU::CLV(uint16_t data){}
+// Done
+// "Clears the overflow flag."
+void CPU::CLV(){
+    this->p &= 0b10111111;
+}
 
 //TODO: Implement
 void CPU::CMP(uint16_t data){}
@@ -1011,11 +1007,33 @@ void CPU::CPY(uint16_t data){}
 //TODO: Implement
 void CPU::DEC(uint16_t data){}
 
-//TODO: Implement
-void CPU::DEX(uint16_t data){}
+// Done
+// "Subtracts one from the X register setting the zero and negative flags as appropriate."
+void CPU::DEX(){
+    this->idX--;
+    
+    this->p &= 0b01111101;
 
-//TODO: Implement
-void CPU::DEY(uint16_t data){}
+    // "Set if X is zero"
+    if (this->idX == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of X is set"
+    this->p |= this->idX & 0b10000000;
+}
+
+// Done
+// "Subtracts one from the Y register setting the zero and negative flags as appropriate."
+void CPU::DEY(){
+    this->idY--;
+    
+    this->p &= 0b01111101;
+
+    // "Set if Y is zero"
+    if (this->idY == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of Y is set"
+    this->p |= this->idY & 0b10000000;
+}
 
 //TODO: Implement
 void CPU::EOR(uint16_t data){}
@@ -1023,13 +1041,37 @@ void CPU::EOR(uint16_t data){}
 //TODO: Implement
 void CPU::INC(uint16_t data){}
 
-//TODO: Implement
-void CPU::INX(uint16_t data){}
+// Done
+// "Adds one to the X register setting the zero and negative flags as appropriate."
+void CPU::INX(){
+    this->idX++;
+    
+    this->p &= 0b01111101;
 
-//TODO: Implement
-void CPU::INY(uint16_t data){}
+    // "Set if X is zero"
+    if (this->idX == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of X is set"
+    this->p |= this->idX & 0b10000000;
+}
 
-//TODO: Implement
+// Done
+// "Adds one to the Y register setting the zero and negative flags as appropriate."
+void CPU::INY(){
+    this->idY++;
+    
+    this->p &= 0b01111101;
+
+    // "Set if Y is zero"
+    if (this->idY == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of Y is set"
+    this->p |= this->idY & 0b10000000;
+}
+
+// Done
+// "Sets the program counter to the address specified by the operand."
+// "An original 6502 has does not correctly fetch the target address if the indirect vector falls on a page boundary (e.g. $xxFF where xx is any value from $00 to $FF). In this case fetches the LSB from $xxFF as expected but takes the MSB from $xx00. This is fixed in some later chips like the 65SC02 so for compatibility always ensure the indirect vector is not at the end of the page."
 void CPU::JMP(uint16_t finalAddress){
     this->pc = finalAddress;
 }
@@ -1050,7 +1092,9 @@ void CPU::LDY(uint16_t data){}
 void CPU::LSR(uint16_t data){}
 
 //TODO: Implement
-void CPU::NOP(uint16_t data){}
+void CPU::NOP(){
+    return;
+}
 
 //TODO: Implement
 void CPU::ORA(uint16_t data){}
@@ -1082,14 +1126,23 @@ void CPU::RTS(uint16_t data){}
 //TODO: Implement
 void CPU::SBC(uint16_t data){}
 
-//TODO: Implement
-void CPU::SEC(uint16_t data){}
+// Done
+// "Set the carry flag to one."
+void CPU::SEC(){
+    this->p |= 0b00000001;
+}
 
-//TODO: Implement
-void CPU::SED(uint16_t data){}
+// Done
+// "Set the decimal mode flag to one."
+void CPU::SED(){
+    this->p |= 0b00001000;
+}
 
-//TODO: Implement
-void CPU::SEI(uint16_t data){}
+// Done
+// "Set the interrupt disable flag to one."
+void CPU::SEI(){
+    this->p |= 0b00000100;
+}
 
 //TODO: Implement
 void CPU::STA(uint16_t data){}
@@ -1100,20 +1153,64 @@ void CPU::STX(uint16_t data){}
 //TODO: Implement
 void CPU::STY(uint16_t data){}
 
-//TODO: Implement
-void CPU::TAX(uint16_t data){}
+// Done
+// "Copies the current contents of the accumulator into the X register and sets the zero and negative flags as appropriate."
+void CPU::TAX(){
+    this->idX = this->acc;
 
-//TODO: Implement
-void CPU::TAY(uint16_t data){}
+    this->p &= 0b01111101;
+
+    // "Set if X is zero"
+    if (this->idX == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of X is set"
+    this->p |= this->idX & 0b10000000;
+}
+
+// Done
+// "Copies the current contents of the accumulator into the Y register and sets the zero and negative flags as appropriate."
+void CPU::TAY(){
+    this->idY = this->acc;
+    
+    this->p &= 0b01111101;
+    
+    // "Set if Y is zero"
+    if (this->idY == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of Y is set"
+    this->p |= this->idY & 0b10000000;
+}
 
 //TODO: Implement
 void CPU::TSX(uint16_t data){}
 
-//TODO: Implement
-void CPU::TXA(uint16_t data){}
+// Done
+// "Copies the current contents of the X register into the accumulator and sets the zero and negative flags as appropriate."
+void CPU::TXA(){
+    this->acc = this->idX;
+    
+    this->p &= 0b01111101;
+
+    // "Set if acc is zero"
+    if (this->acc == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of acc is set"
+    this->p |= this->acc & 0b10000000;
+}
 
 //TODO: Implement
 void CPU::TXS(uint16_t data){}
 
-//TODO: Implement
-void CPU::TYA(uint16_t data){}
+// Done
+// "Copies the current contents of the Y register into the accumulator and sets the zero and negative flags as appropriate."
+void CPU::TYA(){
+    this->acc = this->idY;
+    
+    this->p &= 0b01111101;
+
+    // "Set if acc is zero"
+    if (this->acc == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of acc is set"
+    this->p |= this->acc & 0b10000000;
+}

@@ -11,7 +11,24 @@
             uint8_t acc;
             uint8_t idX;
             uint8_t idY;
-            uint8_t p;
+            
+            // From https://www.nesdev.org/wiki/Status_flags:
+            /*
+                7  bit  0
+                ---- ----
+                NV1B DIZC
+                |||| ||||
+                |||| |||+- Carry
+                |||| ||+-- Zero
+                |||| |+--- Interrupt Disable
+                |||| +---- Decimal
+                |||+------ (No CPU effect; see: the B flag)
+                ||+------- (No CPU effect; always pushed as 1)
+                |+-------- Overflow
+                +--------- Negative
+             */
+            uint8_t p;            
+
             const std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
 
             uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM);
@@ -31,27 +48,27 @@
             void BRK(uint16_t data);
             void BVC(uint16_t data);
             void BVS(uint16_t data);
-            void CLC(uint16_t data);
-            void CLD(uint16_t data);
-            void CLI(uint16_t data);
-            void CLV(uint16_t data);
+            void CLC();
+            void CLD();
+            void CLI();
+            void CLV();
             void CMP(uint16_t data);
             void CPX(uint16_t data);
             void CPY(uint16_t data);
             void DEC(uint16_t data);
-            void DEX(uint16_t data);
-            void DEY(uint16_t data);
+            void DEX();
+            void DEY();
             void EOR(uint16_t data);
             void INC(uint16_t data);
-            void INX(uint16_t data);
-            void INY(uint16_t data);
+            void INX();
+            void INY();
             void JMP(uint16_t data);
             void JSR(uint16_t data);
             void LDA(uint16_t data);
             void LDX(uint16_t data);
             void LDY(uint16_t data);
             void LSR(uint16_t data);
-            void NOP(uint16_t data);
+            void NOP();
             void ORA(uint16_t data);
             void PHA(uint16_t data);
             void PHP(uint16_t data);
@@ -62,18 +79,18 @@
             void RTI(uint16_t data);
             void RTS(uint16_t data);
             void SBC(uint16_t data);
-            void SEC(uint16_t data);
-            void SED(uint16_t data);
-            void SEI(uint16_t data);
+            void SEC();
+            void SED();
+            void SEI();
             void STA(uint16_t data);
             void STX(uint16_t data);
             void STY(uint16_t data);
-            void TAX(uint16_t data);
-            void TAY(uint16_t data);
+            void TAX();
+            void TAY();
             void TSX(uint16_t data);
-            void TXA(uint16_t data);
+            void TXA();
             void TXS(uint16_t data);
-            void TYA(uint16_t data);
+            void TYA();
         public:
             // This must be used by debugger only!
             uint16_t& returnPc();
