@@ -29,11 +29,18 @@
              */
             uint8_t p;            
 
-            const std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
+            std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
+            
+            uint8_t stackPop();
+            void stackPush(uint8_t data);
 
             uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM);
             uint8_t fetchByteAt(uint16_t address);
             uint8_t fetchNextByte();
+
+            void writeByteAt(uint16_t address, uint8_t data);
+
+
             // Instructions below
             void ADC(uint16_t data);
             void AND(uint16_t data);
@@ -70,10 +77,10 @@
             void LSR(uint16_t data);
             void NOP();
             void ORA(uint16_t data);
-            void PHA(uint16_t data);
-            void PHP(uint16_t data);
-            void PLA(uint16_t data);
-            void PLP(uint16_t data);
+            void PHA();
+            void PHP();
+            void PLA();
+            void PLP();
             void ROL(uint16_t data);
             void ROR(uint16_t data);
             void RTI(uint16_t data);
@@ -102,7 +109,11 @@
             const std::vector<uint8_t>& returnMemory();
             
             int executeNextInstruction();
-
-            CPU(std::vector<uint8_t>& memory) : memory(memory){};
+            
+            // "The processor supports a 256 byte stack located between $0100 and $01FF. The stack pointer is an 8 bit register and holds the low 8 bits of the next free location on the stack. The location of the stack is fixed and cannot be moved."
+            // "Pushing bytes to the stack causes the stack pointer to be decremented. Conversely pulling bytes causes it to be incremented."
+            CPU(std::vector<uint8_t>& memory) : memory(memory){
+                this->sp = 0xFF;
+            };
     };
 #endif

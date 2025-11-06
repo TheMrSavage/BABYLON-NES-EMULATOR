@@ -37,6 +37,24 @@ uint8_t CPU::fetchNextByte() {
     return data;
 }
 
+uint8_t CPU::stackPop() {
+    this->sp++;
+    
+    uint8_t element = this->fetchByteAt(0x0100 | this->sp);   
+
+    return element;
+}
+
+void CPU::stackPush(uint8_t data) {
+    this->writeByteAt(0x0100 | this->sp, data);
+
+    this->sp--;
+}
+
+void CPU::writeByteAt(uint16_t address, uint8_t data) {
+    this->memory[address] = data;
+}
+
 // DONE: Implement addressing modes and return the properly address specified by it
 // TODO: Figure out how to verify if there's any pagecrossing in *PAGE*/INDIRECT_* instructions. Maybe reference-value return? I think it's a good approach
 uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
@@ -701,23 +719,19 @@ int CPU::executeNextInstruction() {
             return 5; // (+1 if page crossed)
                       
         case PHA_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->PHA(addressToFetchData);
+            this->PHA();
             return 3; 
                       
         case PHP_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->PHP(addressToFetchData);
+            this->PHP();
             return 3; 
                       
         case PLA_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->PLA(addressToFetchData);
+            this->PLA();
             return 4; 
                       
         case PLP_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->PLP(addressToFetchData);
+            this->PLP();
             return 4; 
                       
         case ROL_ACCUMULATOR:
@@ -1099,17 +1113,41 @@ void CPU::NOP(){
 //TODO: Implement
 void CPU::ORA(uint16_t data){}
 
-//TODO: Implement
-void CPU::PHA(uint16_t data){}
+// Done
+// "Pushes a copy of the accumulator on to the stack."
+void CPU::PHA(){
+    this->stackPush(this->acc);
+}
 
-//TODO: Implement
-void CPU::PHP(uint16_t data){}
+// Done
+// "Pushes a copy of the status flags on to the stack."
+void CPU::PHP(){
+    this->stackPush(this->p);
+}
 
-//TODO: Implement
-void CPU::PLA(uint16_t data){}
+// Done
+// "Pulls an 8 bit value from the stack and into the accumulator. The zero and negative flags are set as appropriate."
+void CPU::PLA(){
+    uint8_t value = this->stackPop();
+       
+    this->p &= 0b01111101;
 
-//TODO: Implement
-void CPU::PLP(uint16_t data){}
+    this->acc = value;
+
+    // "Set if A is zero"
+    if (this->acc == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of A is set"
+    this->p |= this->acc & 0b10000000;
+}
+
+// Done
+// "Pulls an 8 bit value from the stack and into the processor flags. The flags will take on new states as determined by the value pulled."
+void CPU::PLP(){
+    uint8_t value = this->stackPop();
+       
+    this->p = value;
+}
 
 //TODO: Implement
 void CPU::ROL(uint16_t data){}
