@@ -1122,7 +1122,7 @@ void CPU::PHA(){
 // Done
 // "Pushes a copy of the status flags on to the stack."
 void CPU::PHP(){
-    this->stackPush(this->p);
+    this->stackPush(this->p | 0b00110000);
 }
 
 // Done
