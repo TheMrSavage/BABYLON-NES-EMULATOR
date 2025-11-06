@@ -790,8 +790,7 @@ int CPU::executeNextInstruction() {
             return 6; 
                       
         case RTS_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->RTS(addressToFetchData);
+            this->RTS();
             return 6; 
                       
         case SBC_IMMEDIATE:
@@ -1090,8 +1089,17 @@ void CPU::JMP(uint16_t finalAddress){
     this->pc = finalAddress;
 }
 
-//TODO: Implement
-void CPU::JSR(uint16_t data){}
+// Done
+// "(JSR will first push the high-byte of the return address [PC+2] onto the stack, then the low-byte. The stack will then contain, seen from the bottom or from the most recently added byte, [PC+2]-L [PC+2]-H.)"
+void CPU::JSR(uint16_t finalAddress){
+    uint8_t MSB = ( (this->pc - 1) & 0xFF00) >> 8;
+    uint8_t LSB = ( (this->pc - 1) & 0x00FF);
+
+    this->stackPush(MSB);
+    this->stackPush(LSB);
+
+    this->pc = finalAddress;
+}
 
 //TODO: Implement
 void CPU::LDA(uint16_t data){}
@@ -1105,7 +1113,8 @@ void CPU::LDY(uint16_t data){}
 //TODO: Implement
 void CPU::LSR(uint16_t data){}
 
-//TODO: Implement
+// Done
+// Literally, just do nothing
 void CPU::NOP(){
     return;
 }
@@ -1158,8 +1167,27 @@ void CPU::ROR(uint16_t data){}
 //TODO: Implement
 void CPU::RTI(uint16_t data){}
 
-//TODO: Implement
-void CPU::RTS(uint16_t data){}
+// Done
+// Here obelisk guide became a little bit confuse. In docs: "The RTS instruction is used at the end of a subroutine to return to the calling routine. It pulls the program counter (minus one) from the stack." But this don't make sense (or i've had a bad interpretation), because it seems like: "Ok, pulls the previous adresses from stack (that is PC before the JSR minus 1) and then sum one" => But this will result on a infinite loop.
+/*Here https://www.masswerk.at/6502/6502_instruction_set.html#RTS was more clear: "pull PC, PC+1 -> PC", which makes total sense with JSR: 
+    push (PC+2),
+    operand 1st byte -> PCL
+    operand 2nd byte -> PCH
+    N	Z	C	I	D	V
+    -	-	-	-	-	-
+    addressing	assembler	opc	bytes	cycles
+    absolute	JSR oper	20	3	6  
+ */
+/*
+ JSR and RTS affect the stack as the return address is pushed onto or pulled from the stack, respectively.
+(JSR will first push the high-byte of the return address [PC+2] onto the stack, then the low-byte. The stack will then contain, seen from the bottom or from the most recently added byte, [PC+2]-L [PC+2]-H.)
+ */
+void CPU::RTS(){
+    uint8_t LSB = this->stackPop();
+    uint8_t MSB = this->stackPop();
+
+    this->pc = ( (MSB << 8) | LSB) + 1;
+}
 
 //TODO: Implement
 void CPU::SBC(uint16_t data){}
