@@ -785,8 +785,7 @@ int CPU::executeNextInstruction() {
             return 7; 
                       
         case RTI_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->RTI(addressToFetchData);
+            this->RTI();
             return 6; 
                       
         case RTS_IMPLIED:
@@ -1164,8 +1163,21 @@ void CPU::ROL(uint16_t data){}
 //TODO: Implement
 void CPU::ROR(uint16_t data){}
 
-//TODO: Implement
-void CPU::RTI(uint16_t data){}
+// Done
+// "The status register is pulled with the break flag and bit 5 ignored. Then PC is pulled from the stack.
+// From "ignored" he's saying: "Let it as original status register"
+void CPU::RTI(){
+    uint8_t mask = 0b11001111;
+
+    uint8_t newPFlag = this->stackPop() & mask;
+
+    this->p = (this->p & (~mask)) | newPFlag;
+  
+    uint8_t LSB = this->stackPop();
+    uint8_t MSB = this->stackPop();
+
+    this->pc = ( (MSB << 8) | LSB);
+}
 
 // Done
 // Here obelisk guide became a little bit confuse. In docs: "The RTS instruction is used at the end of a subroutine to return to the calling routine. It pulls the program counter (minus one) from the stack." But this don't make sense (or i've had a bad interpretation), because it seems like: "Ok, pulls the previous adresses from stack (that is PC before the JSR minus 1) and then sum one" => But this will result on a infinite loop.

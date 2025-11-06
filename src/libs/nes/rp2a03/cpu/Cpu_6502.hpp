@@ -83,7 +83,7 @@
             void PLP();
             void ROL(uint16_t data);
             void ROR(uint16_t data);
-            void RTI(uint16_t data);
+            void RTI();
             void RTS();
             void SBC(uint16_t data);
             void SEC();
