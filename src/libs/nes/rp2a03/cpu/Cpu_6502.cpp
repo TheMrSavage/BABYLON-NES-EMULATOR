@@ -688,42 +688,50 @@ int CPU::executeNextInstruction() {
                       
         case ORA_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 2; 
                       
         case ORA_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 3; 
                       
         case ORA_ZERO_PAGE_X:
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 4; 
                       
         case ORA_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 4; 
                       
         case ORA_ABSOLUTE_X:
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 4; // (+1 if page crossed)
                       
         case ORA_ABSOLUTE_Y:
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 4; // (+1 if page crossed)
                       
         case ORA_INDIRECT_X:
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 6; 
                       
         case ORA_INDIRECT_Y:
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->ORA(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ORA(data);
             return 5; // (+1 if page crossed)
                       
         case PHA_IMPLIED:
@@ -1137,8 +1145,20 @@ void CPU::NOP(){
     return;
 }
 
-//TODO: Implement
-void CPU::ORA(uint16_t data){}
+// DONE
+// "An inclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory."
+void CPU::ORA(uint8_t data){
+    this->acc |= data;
+
+    this->p &= 0b01111101;
+
+    // "Set if A is zero"
+    if (this->acc == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of A is set"
+    this->p |= this->acc & 0b10000000;
+    
+}
 
 // Done
 // "Pushes a copy of the accumulator on to the stack."
