@@ -435,7 +435,8 @@ int CPU::executeNextInstruction() {
             return 5; // (+1 if page crossed)
                       
         case CPX_IMMEDIATE:
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE); 
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(addressToFetchData);
             return 2; 
                       
@@ -445,12 +446,14 @@ int CPU::executeNextInstruction() {
             return 3; 
                       
         case CPX_ABSOLUTE:
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE); 
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(addressToFetchData);
             return 4; 
                       
         case CPY_IMMEDIATE:
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE); 
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(addressToFetchData);
             return 2; 
                       
@@ -460,7 +463,8 @@ int CPU::executeNextInstruction() {
             return 3; 
                       
         case CPY_ABSOLUTE:
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE); 
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(addressToFetchData);
             return 4; 
                       
@@ -1047,6 +1051,8 @@ void CPU::CLV(){
 void CPU::CMP(uint8_t data){
     this->p &= 0b01111100;
     
+    uint8_t result = this->acc - data;
+
     // "Set if A >= M"
     if (this->acc >= data) this->p |= 0b00000001;
     
@@ -1054,14 +1060,42 @@ void CPU::CMP(uint8_t data){
     if (this->acc == data) this->p |= 0b00000010;
 
     // "Set if bit 7 of the result is set"
-    this->p |= 0b10000000;
+    this->p |= (result & 0b10000000);
 }
 
-//TODO: Implement
-void CPU::CPX(uint16_t data){}
+// DONE
+// "This instruction compares the contents of the X register with another memory held value and sets the zero and carry flags as appropriate."
+void CPU::CPX(uint8_t data){
+    this->p &= 0b01111100;
+    
+    uint8_t result = this->idX - data;
 
-//TODO: Implement
-void CPU::CPY(uint16_t data){}
+    // "Set if X >= M"
+    if (this->idX >= data) this->p |= 0b00000001;
+    
+    // "Set if X = M"
+    if (this->idX == data) this->p |= 0b00000010;
+
+    // "Set if bit 7 of the result is set"
+    this->p |= (result & 0b10000000);
+}
+
+// DONE
+// "This instruction compares the contents of the Y register with another memory held value and sets the zero and carry flags as appropriate."
+void CPU::CPY(uint8_t data){
+    this->p &= 0b01111100;
+    
+    uint8_t result = this->idY - data;
+
+    // "Set if Y >= M"
+    if (this->idY >= data) this->p |= 0b00000001;
+    
+    // "Set if Y = M"
+    if (this->idY == data) this->p |= 0b00000010;
+
+    // "Set if bit 7 of the result is set"
+    this->p |= (result & 0b10000000);
+}
 
 //TODO: Implement
 void CPU::DEC(uint16_t data){}

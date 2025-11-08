@@ -60,8 +60,8 @@
             void CLI();
             void CLV();
             void CMP(uint8_t data);
-            void CPX(uint16_t data);
-            void CPY(uint16_t data);
+            void CPX(uint8_t data);
+            void CPY(uint8_t data);
             void DEC(uint16_t data);
             void DEX();
             void DEY();
@@ -76,7 +76,7 @@
             void LDY(uint16_t data);
             void LSR(uint16_t data);
             void NOP();
-            void ORA(uint16_t data);
+            void ORA(uint8_t data);
             void PHA();
             void PHP();
             void PLA();
