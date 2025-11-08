@@ -59,7 +59,7 @@
             void CLD();
             void CLI();
             void CLV();
-            void CMP(uint16_t data);
+            void CMP(uint8_t data);
             void CPX(uint16_t data);
             void CPY(uint16_t data);
             void DEC(uint16_t data);

@@ -388,42 +388,50 @@ int CPU::executeNextInstruction() {
                       
         case CMP_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 2; 
                       
         case CMP_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 3; 
                       
         case CMP_ZERO_PAGE_X:
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 4; 
                       
         case CMP_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 4; 
                       
         case CMP_ABSOLUTE_X:
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 4; // (+1 if page crossed)
                       
         case CMP_ABSOLUTE_Y:
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 4; // (+1 if page crossed)
                       
         case CMP_INDIRECT_X:
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 6; 
                       
         case CMP_INDIRECT_Y:
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->CMP(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->CMP(data);
             return 5; // (+1 if page crossed)
                       
         case CPX_IMMEDIATE:
@@ -1034,8 +1042,20 @@ void CPU::CLV(){
     this->p &= 0b10111111;
 }
 
-//TODO: Implement
-void CPU::CMP(uint16_t data){}
+// Done
+// "This instruction compares the contents of the accumulator with another memory held value and sets the zero and carry flags as appropriate."
+void CPU::CMP(uint8_t data){
+    this->p &= 0b01111100;
+    
+    // "Set if A >= M"
+    if (this->acc >= data) this->p |= 0b00000001;
+    
+    // "Set if A = M"
+    if (this->acc == data) this->p |= 0b00000010;
+
+    // "Set if bit 7 of the result is set"
+    this->p |= 0b10000000;
+}
 
 //TODO: Implement
 void CPU::CPX(uint16_t data){}
