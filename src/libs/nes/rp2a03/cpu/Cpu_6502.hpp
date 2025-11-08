@@ -43,7 +43,7 @@
 
             // Instructions below
             void ADC(uint16_t data);
-            void AND(uint16_t data);
+            void AND(uint8_t data);
             void ASL(uint16_t data);
             void BCC(uint16_t data);
             void BCS(uint16_t data);

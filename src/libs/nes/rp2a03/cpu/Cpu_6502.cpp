@@ -244,42 +244,50 @@ int CPU::executeNextInstruction() {
                       
         case AND_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 2; 
                       
         case AND_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 3; 
                       
         case AND_ZERO_PAGE_X:
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 4; 
                       
         case AND_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 4; 
                       
         case AND_ABSOLUTE_X:
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 4; // (+1 if page crossed)
                       
         case AND_ABSOLUTE_Y:
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 4; // (+1 if page crossed)
                       
         case AND_INDIRECT_X:
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 6; 
                       
         case AND_INDIRECT_Y:
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->AND(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->AND(data);
             return 5; // (+1 if page crossed)
                       
         case ASL_ACCUMULATOR:
@@ -947,8 +955,20 @@ int CPU::executeNextInstruction() {
 //TODO: Implement
 void CPU::ADC(uint16_t data){}
 
-//TODO: Implement
-void CPU::AND(uint16_t data){}
+// Done
+// "A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory."
+void CPU::AND(uint8_t data){
+    this->acc &= data;
+
+    this->p &= 0b01111101;
+
+    // "Set if A is zero"
+    if (this->acc == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of A is set"
+    this->p |= this->acc & 0b10000000;
+    
+}
 
 //TODO: Implement
 void CPU::ASL(uint16_t data){}
