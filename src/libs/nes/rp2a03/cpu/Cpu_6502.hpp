@@ -94,7 +94,7 @@
             void STY(uint16_t data);
             void TAX();
             void TAY();
-            void TSX(uint16_t data);
+            void TSX();
             void TXA();
             void TXS(uint16_t data);
             void TYA();

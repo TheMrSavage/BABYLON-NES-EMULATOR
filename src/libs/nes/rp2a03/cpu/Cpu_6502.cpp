@@ -926,8 +926,7 @@ int CPU::executeNextInstruction() {
             return 2; 
                       
         case TSX_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TSX(addressToFetchData);
+            this->TSX();
             return 2; 
                       
         case TXA_IMPLIED:
@@ -1279,8 +1278,19 @@ void CPU::TAY(){
     this->p |= this->idY & 0b10000000;
 }
 
-//TODO: Implement
-void CPU::TSX(uint16_t data){}
+//DONE
+// "Copies the current contents of the stack register into the X register and sets the zero and negative flags as appropriate."
+void CPU::TSX(){
+    this->idX = this->sp;
+    
+    this->p &= 0b01111101;
+    
+    // "Set if X is zero"
+    if (this->idX == 0) this->p |= 0b00000010;
+    
+    // "Set if bit 7 of X is set"
+    this->p |= this->idX & 0b10000000;
+}
 
 // Done
 // "Copies the current contents of the X register into the accumulator and sets the zero and negative flags as appropriate."
