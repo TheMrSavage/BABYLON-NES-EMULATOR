@@ -437,35 +437,36 @@ int CPU::executeNextInstruction() {
         case CPX_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
-            this->CPX(addressToFetchData);
+            this->CPX(data);
             return 2; 
                       
         case CPX_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->CPX(addressToFetchData);
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
+            this->CPX(data);
             return 3; 
                       
         case CPX_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
-            this->CPX(addressToFetchData);
+            this->CPX(data);
             return 4; 
                       
         case CPY_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
-            this->CPY(addressToFetchData);
+            this->CPY(data);
             return 2; 
                       
         case CPY_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->CPY(addressToFetchData);
+            this->CPY(data);
             return 3; 
                       
         case CPY_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
-            this->CPY(addressToFetchData);
+            this->CPY(data);
             return 4; 
                       
         case DEC_ZERO_PAGE:
