@@ -979,13 +979,13 @@ void CPU::ADC(uint16_t data){}
 void CPU::AND(uint8_t data){
     this->acc &= data;
 
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if A is zero"
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of A is set"
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
     
 }
 
@@ -994,29 +994,29 @@ void CPU::AND(uint8_t data){
 void CPU::ASL(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
 
-    this->p |= (data & 0b00000001);
+    this->p |= (data & P_FLAG_CARRY);
     
     this->p &= 0b01111100;
 
     data <<= 1;
 
-    if (data == 0) this->p |= 0b00000010;
+    if (data == 0) this->p |= P_FLAG_ZERO;
   
-    this->p |= data & 0b10000000;
+    this->p |= data & P_FLAG_NEGATIVE;
 
     this->writeByteAt(memoryAddress, data);
 }
 
 void CPU::ASL(){
-    this->p |= (this->acc & 0b10000000);
+    this->p |= (this->acc & P_FLAG_NEGATIVE);
     
     this->acc <<= 1;
     
     this->p &= 0b01111100;
 
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
   
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
 //TODO: Implement
@@ -1081,13 +1081,13 @@ void CPU::CMP(uint8_t data){
     uint8_t result = this->acc - data;
 
     // "Set if A >= M"
-    if (this->acc >= data) this->p |= 0b00000001;
+    if (this->acc >= data) this->p |= P_FLAG_CARRY;
     
     // "Set if A = M"
-    if (this->acc == data) this->p |= 0b00000010;
+    if (this->acc == data) this->p |= P_FLAG_ZERO;
 
     // "Set if bit 7 of the result is set"
-    this->p |= (result & 0b10000000);
+    this->p |= (result & P_FLAG_NEGATIVE);
 }
 
 // DONE
@@ -1098,13 +1098,13 @@ void CPU::CPX(uint8_t data){
     uint8_t result = this->idX - data;
 
     // "Set if X >= M"
-    if (this->idX >= data) this->p |= 0b00000001;
+    if (this->idX >= data) this->p |= P_FLAG_CARRY;
     
     // "Set if X = M"
-    if (this->idX == data) this->p |= 0b00000010;
+    if (this->idX == data) this->p |= P_FLAG_ZERO;
 
     // "Set if bit 7 of the result is set"
-    this->p |= (result & 0b10000000);
+    this->p |= (result & P_FLAG_NEGATIVE);
 }
 
 // DONE
@@ -1115,13 +1115,13 @@ void CPU::CPY(uint8_t data){
     uint8_t result = this->idY - data;
 
     // "Set if Y >= M"
-    if (this->idY >= data) this->p |= 0b00000001;
+    if (this->idY >= data) this->p |= P_FLAG_CARRY;
     
     // "Set if Y = M"
-    if (this->idY == data) this->p |= 0b00000010;
+    if (this->idY == data) this->p |= P_FLAG_ZERO;
 
     // "Set if bit 7 of the result is set"
-    this->p |= (result & 0b10000000);
+    this->p |= (result & P_FLAG_NEGATIVE);
 }
 
 //TODO: Implement
@@ -1132,13 +1132,13 @@ void CPU::DEC(uint16_t data){}
 void CPU::DEX(){
     this->idX--;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if X is zero"
-    if (this->idX == 0) this->p |= 0b00000010;
+    if (this->idX == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of X is set"
-    this->p |= this->idX & 0b10000000;
+    this->p |= this->idX & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1146,13 +1146,13 @@ void CPU::DEX(){
 void CPU::DEY(){
     this->idY--;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if Y is zero"
-    if (this->idY == 0) this->p |= 0b00000010;
+    if (this->idY == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of Y is set"
-    this->p |= this->idY & 0b10000000;
+    this->p |= this->idY & P_FLAG_NEGATIVE;
 }
 
 //TODO: Implement
@@ -1166,13 +1166,13 @@ void CPU::INC(uint16_t data){}
 void CPU::INX(){
     this->idX++;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if X is zero"
-    if (this->idX == 0) this->p |= 0b00000010;
+    if (this->idX == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of X is set"
-    this->p |= this->idX & 0b10000000;
+    this->p |= this->idX & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1180,13 +1180,13 @@ void CPU::INX(){
 void CPU::INY(){
     this->idY++;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if Y is zero"
-    if (this->idY == 0) this->p |= 0b00000010;
+    if (this->idY == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of Y is set"
-    this->p |= this->idY & 0b10000000;
+    this->p |= this->idY & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1231,13 +1231,13 @@ void CPU::NOP(){
 void CPU::ORA(uint8_t data){
     this->acc |= data;
 
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if A is zero"
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of A is set"
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
     
 }
 
@@ -1258,15 +1258,15 @@ void CPU::PHP(){
 void CPU::PLA(){
     uint8_t value = this->stackPop();
        
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     this->acc = value;
 
     // "Set if A is zero"
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of A is set"
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1327,19 +1327,19 @@ void CPU::SBC(uint16_t data){}
 // Done
 // "Set the carry flag to one."
 void CPU::SEC(){
-    this->p |= 0b00000001;
+    this->p |= P_FLAG_CARRY;
 }
 
 // Done
 // "Set the decimal mode flag to one."
 void CPU::SED(){
-    this->p |= 0b00001000;
+    this->p |= P_FLAG_DECIMAL;
 }
 
 // Done
 // "Set the interrupt disable flag to one."
 void CPU::SEI(){
-    this->p |= 0b00000100;
+    this->p |= P_FLAG_INTERRUPT_DISABLE;
 }
 
 //TODO: Implement
@@ -1362,13 +1362,13 @@ void CPU::STY(uint16_t address){
 void CPU::TAX(){
     this->idX = this->acc;
 
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if X is zero"
-    if (this->idX == 0) this->p |= 0b00000010;
+    if (this->idX == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of X is set"
-    this->p |= this->idX & 0b10000000;
+    this->p |= this->idX & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1376,13 +1376,13 @@ void CPU::TAX(){
 void CPU::TAY(){
     this->idY = this->acc;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
     
     // "Set if Y is zero"
-    if (this->idY == 0) this->p |= 0b00000010;
+    if (this->idY == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of Y is set"
-    this->p |= this->idY & 0b10000000;
+    this->p |= this->idY & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1390,13 +1390,13 @@ void CPU::TAY(){
 void CPU::TSX(){
     this->idX = this->sp;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
     
     // "Set if X is zero"
-    if (this->idX == 0) this->p |= 0b00000010;
+    if (this->idX == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of X is set"
-    this->p |= this->idX & 0b10000000;
+    this->p |= this->idX & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1404,13 +1404,13 @@ void CPU::TSX(){
 void CPU::TXA(){
     this->acc = this->idX;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if acc is zero"
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of acc is set"
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
 // Done
@@ -1424,11 +1424,11 @@ void CPU::TXS(){
 void CPU::TYA(){
     this->acc = this->idY;
     
-    this->p &= 0b01111101;
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
 
     // "Set if acc is zero"
-    if (this->acc == 0) this->p |= 0b00000010;
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
     
     // "Set if bit 7 of acc is set"
-    this->p |= this->acc & 0b10000000;
+    this->p |= this->acc & P_FLAG_NEGATIVE;
 }
