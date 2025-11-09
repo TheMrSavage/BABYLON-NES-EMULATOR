@@ -96,7 +96,7 @@
             void TAY();
             void TSX();
             void TXA();
-            void TXS(uint16_t data);
+            void TXS();
             void TYA();
         public:
             // This must be used by debugger only!

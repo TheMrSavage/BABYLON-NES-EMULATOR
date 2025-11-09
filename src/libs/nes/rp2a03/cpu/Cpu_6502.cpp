@@ -956,8 +956,7 @@ int CPU::executeNextInstruction() {
             return 2; 
                       
         case TXS_IMPLIED:
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->TXS(addressToFetchData);
+            this->TXS();
             return 2; 
                       
         case TYA_IMPLIED:
@@ -1360,7 +1359,7 @@ void CPU::TAY(){
     this->p |= this->idY & 0b10000000;
 }
 
-//DONE
+// Done
 // "Copies the current contents of the stack register into the X register and sets the zero and negative flags as appropriate."
 void CPU::TSX(){
     this->idX = this->sp;
@@ -1388,8 +1387,11 @@ void CPU::TXA(){
     this->p |= this->acc & 0b10000000;
 }
 
-//TODO: Implement
-void CPU::TXS(uint16_t data){}
+// Done
+// "Copies the current contents of the X register into the stack register."
+void CPU::TXS(){
+    this->sp = this->idX;   
+}
 
 // Done
 // "Copies the current contents of the Y register into the accumulator and sets the zero and negative flags as appropriate."
