@@ -460,6 +460,7 @@ int CPU::executeNextInstruction() {
                       
         case CPY_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
+ 	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
             return 3; 
                       
@@ -1319,11 +1320,17 @@ void CPU::SEI(){
 //TODO: Implement
 void CPU::STA(uint16_t data){}
 
-//TODO: Implement
-void CPU::STX(uint16_t data){}
+// Done
+// "Stores the contents of the X register into memory."
+void CPU::STX(uint16_t address){
+    this->writeByteAt(address, this->idX);
+}
 
-//TODO: Implement
-void CPU::STY(uint16_t data){}
+// Done
+// "Stores the contents of the Y register into memory."
+void CPU::STY(uint16_t address){
+    this->writeByteAt(address, this->idY);
+}
 
 // Done
 // "Copies the current contents of the accumulator into the X register and sets the zero and negative flags as appropriate."
