@@ -1,5 +1,15 @@
 #ifndef CPU_6502
     #define CPU_6502
+    
+    // See P variable
+    #define P_FLAG_CARRY                0b00000001
+    #define P_FLAG_ZERO                 0b00000010
+    #define P_FLAG_INTERRUPT_DISABLE    0b00000100
+    #define P_FLAG_DECIMAL              0b00001000
+    #define P_FLAG_B                    0b00010000
+    #define P_FLAG_ALWAYS_ONE           0b00100000
+    #define P_FLAG_OVERFLOW             0b01000000
+    #define P_FLAG_NEGATIVE             0b10000000
 
     #include <cstdint>
     #include <vector>
