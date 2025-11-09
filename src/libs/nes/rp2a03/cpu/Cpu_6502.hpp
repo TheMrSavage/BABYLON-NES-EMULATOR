@@ -86,6 +86,7 @@
             void LDX(uint16_t data);
             void LDY(uint16_t data);
             void LSR(uint16_t data);
+            void LSR(); // For accumulator
             void NOP();
             void ORA(uint8_t data);
             void PHA();

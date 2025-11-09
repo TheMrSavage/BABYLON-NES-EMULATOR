@@ -671,8 +671,7 @@ int CPU::executeNextInstruction() {
             return 4; // (+1 if page crossed)
                       
         case LSR_ACCUMULATOR:
-            addressToFetchData = this->getNextAddress(ACCUMULATOR);
-            this->LSR(addressToFetchData);
+            this->LSR();
             return 2; 
                       
         case LSR_ZERO_PAGE:
@@ -994,7 +993,7 @@ void CPU::AND(uint8_t data){
 void CPU::ASL(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
 
-    this->p |= (data & P_FLAG_CARRY);
+    this->p |= (data & P_FLAG_NEGATIVE);
     
     this->p &= 0b01111100;
 
@@ -1217,8 +1216,37 @@ void CPU::LDX(uint16_t data){}
 //TODO: Implement
 void CPU::LDY(uint16_t data){}
 
-//TODO: Implement
-void CPU::LSR(uint16_t data){}
+// Done
+// "Each of the bits in A or M is shift one place to the right. The bit that was in bit 0 is shifted into the carry flag. Bit 7 is set to zero."
+void CPU::LSR(uint16_t memoryAddress){
+    uint8_t data = this->fetchByteAt(memoryAddress);
+
+    this->p |= (data & P_FLAG_CARRY);
+    
+    this->p &= 0b01111100;
+
+    data >>= 1;
+
+    if (data == 0) this->p |= P_FLAG_ZERO;
+  
+    this->p |= data & P_FLAG_NEGATIVE;
+
+    this->writeByteAt(memoryAddress, data);
+
+}
+
+void CPU::LSR(){
+    this->p |= (this->acc & P_FLAG_NEGATIVE);
+    
+    this->acc >>= 1;
+    
+    this->p &= 0b01111100;
+
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+  
+    this->p |= this->acc & P_FLAG_NEGATIVE;
+    
+}
 
 // Done
 // Literally, just do nothing
