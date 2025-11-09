@@ -291,8 +291,7 @@ int CPU::executeNextInstruction() {
             return 5; // (+1 if page crossed)
                       
         case ASL_ACCUMULATOR:
-            addressToFetchData = this->getNextAddress(ACCUMULATOR);
-            this->ASL(addressToFetchData);
+            this->ASL();
             return 2; 
                       
         case ASL_ZERO_PAGE:
@@ -990,8 +989,35 @@ void CPU::AND(uint8_t data){
     
 }
 
-//TODO: Implement
-void CPU::ASL(uint16_t data){}
+// Done
+// "This operation shifts all the bits of the accumulator or memory contents one bit left. Bit 0 is set to 0 and bit 7 is placed in the carry flag. The effect of this operation is to multiply the memory contents by 2 (ignoring 2's complement considerations), setting the carry if the result will not fit in 8 bits."
+void CPU::ASL(uint16_t memoryAddress){
+    uint8_t data = this->fetchByteAt(memoryAddress);
+
+    this->p |= (data & 0b00000001);
+    
+    this->p &= 0b01111100;
+
+    data <<= 1;
+
+    if (data == 0) this->p |= 0b00000010;
+  
+    this->p |= data & 0b10000000;
+
+    this->writeByteAt(memoryAddress, data);
+}
+
+void CPU::ASL(){
+    this->p |= (this->acc & 0b10000000);
+    
+    this->acc <<= 1;
+    
+    this->p &= 0b01111100;
+
+    if (this->acc == 0) this->p |= 0b00000010;
+  
+    this->p |= this->acc & 0b10000000;
+}
 
 //TODO: Implement
 void CPU::BCC(uint16_t data){}
