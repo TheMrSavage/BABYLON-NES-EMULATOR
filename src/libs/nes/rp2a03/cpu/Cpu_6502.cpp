@@ -1151,8 +1151,19 @@ void CPU::CPY(uint8_t data){
     this->p |= (result & P_FLAG_NEGATIVE);
 }
 
-//TODO: Implement
-void CPU::DEC(uint16_t data){}
+// Done
+// "Subtracts one from the value held at a specified memory location setting the zero and negative flags as appropriate."
+void CPU::DEC(uint16_t memoryAddress){
+    uint8_t value = this->fetchByteAt(memoryAddress);
+    value--;
+    
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
+
+    if (value == 0) this->p |= P_FLAG_ZERO;
+    this->p |= value & P_FLAG_NEGATIVE;
+
+    this->writeByteAt(memoryAddress, value);
+}
 
 // Done
 // "Subtracts one from the X register setting the zero and negative flags as appropriate."
@@ -1182,7 +1193,7 @@ void CPU::DEY(){
     this->p |= this->idY & P_FLAG_NEGATIVE;
 }
 
-//
+// Done
 // "An exclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory."
 void CPU::EOR(uint8_t data){
     this->acc ^= data;
