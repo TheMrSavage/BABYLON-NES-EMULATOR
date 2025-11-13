@@ -1269,14 +1269,53 @@ void CPU::JSR(uint16_t finalAddress){
     this->pc = finalAddress;
 }
 
-//TODO: Implement
-void CPU::LDA(uint16_t data){}
+// Done
+// "Loads a byte of memory into the accumulator setting the zero and negative flags as appropriate."
+void CPU::LDA(uint16_t memoryAddress){
+    uint8_t data = fetchByteAt(memoryAddress);
 
-//TODO: Implement
-void CPU::LDX(uint16_t data){}
+    this->acc = data;
+    
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    
+    // Set if A = 0
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+    
+    // Set if bit 7 of A is set
+    this->p |= this->acc & P_FLAG_NEGATIVE;
+}
 
-//TODO: Implement
-void CPU::LDY(uint16_t data){}
+// Done
+// "Loads a byte of memory into the X register setting the zero and negative flags as appropriate."
+void CPU::LDX(uint16_t memoryAddress){
+    uint8_t data = fetchByteAt(memoryAddress);
+
+    this->idX = data;
+    
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    
+    // Set if X = 0
+    if (this->idX == 0) this->p |= P_FLAG_ZERO;
+    
+    //Set if bit 7 of X is set
+    this->p |= this->idX & P_FLAG_NEGATIVE;
+}
+
+// Done
+// "Loads a byte of memory into the Y register setting the zero and negative flags as appropriate."
+void CPU::LDY(uint16_t memoryAddress){
+    uint8_t data = fetchByteAt(memoryAddress);
+
+    this->idY = data;
+    
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    
+    // Set if Y = 0
+    if (this->idY == 0) this->p |= P_FLAG_ZERO;
+    
+    // Set if bit 7 of Y is set
+    this->p |= this->idY & P_FLAG_NEGATIVE;
+}
 
 // Done
 // "Each of the bits in A or M is shift one place to the right. The bit that was in bit 0 is shifted into the carry flag. Bit 7 is set to zero."
