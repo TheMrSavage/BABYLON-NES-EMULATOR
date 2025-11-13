@@ -76,7 +76,7 @@
             void DEC(uint16_t data);
             void DEX();
             void DEY();
-            void EOR(uint16_t data);
+            void EOR(uint8_t data);
             void INC(uint16_t data);
             void INX();
             void INY();

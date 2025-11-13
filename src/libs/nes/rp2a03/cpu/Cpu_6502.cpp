@@ -500,42 +500,50 @@ int CPU::executeNextInstruction() {
                       
         case EOR_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 2; 
                       
         case EOR_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 3; 
                       
         case EOR_ZERO_PAGE_X:
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 4; 
                       
         case EOR_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 4; 
                       
         case EOR_ABSOLUTE_X:
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 4; // (+1 if page crossed)
                       
         case EOR_ABSOLUTE_Y:
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 4; // (+1 if page crossed)
                       
         case EOR_INDIRECT_X:
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 6; 
                       
         case EOR_INDIRECT_Y:
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->EOR(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->EOR(data);
             return 5; // (+1 if page crossed)
                       
         case INC_ZERO_PAGE:
@@ -1174,8 +1182,19 @@ void CPU::DEY(){
     this->p |= this->idY & P_FLAG_NEGATIVE;
 }
 
-//TODO: Implement
-void CPU::EOR(uint16_t data){}
+//
+// "An exclusive OR is performed, bit by bit, on the accumulator contents using the contents of a byte of memory."
+void CPU::EOR(uint8_t data){
+    this->acc ^= data;
+
+    this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
+
+    // "Set if A is zero"
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+    
+    // "Set if bit 7 of A is set"
+    this->p |= this->acc & P_FLAG_NEGATIVE;
+}
 
 //TODO: Implement
 void CPU::INC(uint16_t data){}
