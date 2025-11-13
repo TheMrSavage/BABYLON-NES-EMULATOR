@@ -204,37 +204,44 @@ int CPU::executeNextInstruction() {
     switch (opcode) {
         case ADC_IMMEDIATE:
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 2; 
               
         case ADC_ZERO_PAGE:
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 3; 
                       
         case ADC_ZERO_PAGE_X:
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 4; 
                       
         case ADC_ABSOLUTE:
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 4; 
                       
         case ADC_ABSOLUTE_X:
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 4; // (+1 if page crossed)
                       
         case ADC_ABSOLUTE_Y:
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 4; // (+1 if page crossed)
                       
         case ADC_INDIRECT_X:
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->ADC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 6; 
                       
         case ADC_INDIRECT_Y:
