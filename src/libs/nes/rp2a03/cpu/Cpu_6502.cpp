@@ -239,7 +239,8 @@ int CPU::executeNextInstruction() {
                       
         case ADC_INDIRECT_Y:
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->ADC(addressToFetchData);
+            data = this->fetchByteAt(addressToFetchData);
+            this->ADC(data);
             return 5; // (+1 if page crossed)
                       
         case AND_IMMEDIATE:
@@ -970,8 +971,27 @@ int CPU::executeNextInstruction() {
 // All instructions below
 // TODO: There's some instructions that recive an address and other then recive a data... With time i change the signature of functions to match each case, but i want to have the proper skeleton for now
 
-//TODO: Implement
-void CPU::ADC(uint16_t data){}
+// Done
+// "This instruction adds the contents of a memory location to the accumulator together with the carry bit. If overflow occurs the carry bit is set, this enables multiple byte addition to be performed."
+void CPU::ADC(uint8_t data){
+    uint8_t carryBit = this->p & P_FLAG_CARRY;
+
+    uint8_t result = this->acc + data + carryBit;
+
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE | P_FLAG_OVERFLOW);
+
+    if (this->acc > 0xFF - (uint16_t)(data + carryBit)) this->p |= P_FLAG_CARRY;
+    
+    uint8_t resultSign = result & P_FLAG_NEGATIVE;
+
+    if ( ( (this->acc & P_FLAG_NEGATIVE) == (data & P_FLAG_NEGATIVE) ) && resultSign != (this->acc & P_FLAG_NEGATIVE) )
+        this->p |= P_FLAG_OVERFLOW;
+
+    this->acc = result;
+        
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+    if (this->acc & P_FLAG_NEGATIVE) this->p |= P_FLAG_NEGATIVE;
+}
 
 // Done
 // "A logical AND is performed, bit by bit, on the accumulator contents using the contents of a byte of memory."

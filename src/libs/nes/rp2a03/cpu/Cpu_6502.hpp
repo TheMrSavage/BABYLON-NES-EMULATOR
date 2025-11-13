@@ -52,7 +52,7 @@
 
 
             // Instructions below
-            void ADC(uint16_t data);
+            void ADC(uint8_t data);
             void AND(uint8_t data);
             void ASL(uint16_t memoryAddress);
             void ASL(); // For accumulator mode
