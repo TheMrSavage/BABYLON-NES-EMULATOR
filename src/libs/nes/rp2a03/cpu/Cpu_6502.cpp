@@ -1207,8 +1207,20 @@ void CPU::EOR(uint8_t data){
     this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
-//TODO: Implement
-void CPU::INC(uint16_t data){}
+// Done
+// "Adds one to the value held at a specified memory location setting the zero and negative flags as appropriate."
+void CPU::INC(uint16_t memoryAddress){
+    uint8_t value = this->fetchByteAt(memoryAddress);
+    value++;
+    
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
+
+    if (value == 0) this->p |= P_FLAG_ZERO;
+    this->p |= value & P_FLAG_NEGATIVE;
+
+    this->writeByteAt(memoryAddress, value);
+
+}
 
 // Done
 // "Adds one to the X register setting the zero and negative flags as appropriate."
