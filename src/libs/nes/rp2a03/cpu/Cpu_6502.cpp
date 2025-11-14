@@ -1539,8 +1539,11 @@ void CPU::SEI(){
     this->p |= P_FLAG_INTERRUPT_DISABLE;
 }
 
-//TODO: Implement
-void CPU::STA(uint16_t data){}
+// Done
+// "Stores the contents of the accumulator into memory."
+void CPU::STA(uint16_t memoryAddress){
+    this->writeByteAt(memoryAddress, this->acc);
+}
 
 // Done
 // "Stores the contents of the X register into memory."
