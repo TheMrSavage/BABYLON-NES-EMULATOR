@@ -1060,8 +1060,19 @@ void CPU::BCS(uint16_t data){}
 //TODO: Implement
 void CPU::BEQ(uint16_t data){}
 
-//TODO: Implement
-void CPU::BIT(uint16_t data){}
+//  Done
+// "This instructions is used to test if one or more bits are set in a target memory location. The mask pattern in A is ANDed with the value in memory to set or clear the zero flag, but the result is not kept. Bits 7 and 6 of the value from memory are copied into the N and V flags."
+void CPU::BIT(uint16_t memoryAddress){
+    uint8_t data = this->fetchByteAt(memoryAddress);
+    
+    uint8_t result = this->acc & data;
+
+    this->p &= ~(P_FLAG_ZERO | P_FLAG_OVERFLOW | P_FLAG_NEGATIVE);
+
+    if (result == 0) this->p |= P_FLAG_ZERO;
+
+    this->p |= data & (P_FLAG_OVERFLOW | P_FLAG_NEGATIVE); 
+}
 
 //TODO: Implement
 void CPU::BMI(uint16_t data){}
