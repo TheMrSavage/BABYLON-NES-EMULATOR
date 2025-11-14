@@ -779,8 +779,7 @@ int CPU::executeNextInstruction() {
             return 4; 
                       
         case ROL_ACCUMULATOR:
-            addressToFetchData = this->getNextAddress(ACCUMULATOR);
-            this->ROL(addressToFetchData);
+            this->ROL();
             return 2; 
                       
         case ROL_ZERO_PAGE:
@@ -804,8 +803,7 @@ int CPU::executeNextInstruction() {
             return 7; 
                       
         case ROR_ACCUMULATOR:
-            addressToFetchData = this->getNextAddress(ACCUMULATOR);
-            this->ROR(addressToFetchData);
+            this->ROR();
             return 2; 
                       
         case ROR_ZERO_PAGE:
@@ -1413,11 +1411,74 @@ void CPU::PLP(){
     this->p = value;
 }
 
-//TODO: Implement
-void CPU::ROL(uint16_t data){}
+// Done 
+// "Move each of the bits in either A or M one place to the left. Bit 0 is filled with the current value of the carry flag whilst the old bit 7 becomes the new carry flag value."
+void CPU::ROL(uint16_t memoryAddress){
+    uint8_t data = this->fetchByteAt(memoryAddress);
 
-//TODO: Implement
-void CPU::ROR(uint16_t data){}
+    uint8_t newCarryFlag = (data & P_FLAG_NEGATIVE) >> 7;
+
+    data <<= 1;
+
+    data |= (this->p & P_FLAG_CARRY);
+
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    if (data == 0) this->p |= P_FLAG_ZERO;
+    this->p |= (data & P_FLAG_NEGATIVE);
+
+    this->p |= newCarryFlag;
+
+    this->writeByteAt(memoryAddress, data);
+}
+
+void CPU::ROL(){
+    uint8_t newCarryFlag = (this->acc & P_FLAG_NEGATIVE) >> 7;
+
+    this->acc <<= 1;
+
+    this->acc |= (this->p & P_FLAG_CARRY);
+
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+    this->p |= (this-> acc & P_FLAG_NEGATIVE);
+
+    this->p |= newCarryFlag;
+}
+
+
+// Done
+// "Move each of the bits in either A or M one place to the right. Bit 7 is filled with the current value of the carry flag whilst the old bit 0 becomes the new carry flag value."
+void CPU::ROR(uint16_t memoryAddress){
+    uint8_t data = this->fetchByteAt(memoryAddress);
+
+    uint8_t newCarryFlag = (data & P_FLAG_CARRY);
+
+    data >>= 1;
+
+    data |= ( (this->p & P_FLAG_CARRY) << 7);
+
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    if (data == 0) this->p |= P_FLAG_ZERO;
+    this->p |= (data & P_FLAG_NEGATIVE);
+
+    this->p |= newCarryFlag;
+
+    this->writeByteAt(memoryAddress, data);
+}
+
+void CPU::ROR(){
+    uint8_t newCarryFlag = (this->acc & P_FLAG_CARRY);
+
+    this->acc >>= 1;
+
+    this->acc |= ( (this->p & P_FLAG_CARRY) << 7);
+
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    if (this->acc == 0) this->p |= P_FLAG_ZERO;
+    this->p |= (this-> acc & P_FLAG_NEGATIVE);
+
+    this->p |= newCarryFlag;
+}
 
 // Done
 // "The status register is pulled with the break flag and bit 5 ignored. Then PC is pulled from the stack.

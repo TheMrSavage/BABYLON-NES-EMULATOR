@@ -94,7 +94,9 @@
             void PLA();
             void PLP();
             void ROL(uint16_t data);
+            void ROL(); // For accumulator
             void ROR(uint16_t data);
+            void ROR(); // For accumulator
             void RTI();
             void RTS();
             void SBC(uint16_t data);
