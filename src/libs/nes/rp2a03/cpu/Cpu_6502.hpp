@@ -62,7 +62,7 @@
             void BIT(uint16_t data);
             uint8_t BMI(int8_t relativeJump);
             uint8_t BNE(int8_t relativeJump);
-            void BPL(uint16_t data);
+            uint8_t BPL(int8_t relativeJump);
             void BRK(uint16_t data);
             void BVC(uint16_t data);
             void BVS(uint16_t data);
