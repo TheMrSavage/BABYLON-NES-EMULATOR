@@ -6,10 +6,7 @@
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
-#include <iomanip>
 #include <iostream>
-#include <iterator>
 #include <thread>
 #include <vector>
 
@@ -73,13 +70,13 @@ void EmulatorController::start() {
 }
 
 void EmulatorController::handleRoom(const std::vector<uint8_t>& room) {
-    for (uint8_t d : room) {
+    /*for (uint8_t d : room) {
         std::cout <<  std::hex << std::setw(2) << (int)d << " ";
     }
     std::cout << std::endl;
     
     // As we want to debug 6502 CPU first we don't need (and don't want) to validate the file header
-    /*if (!this->isValidRoom(room)) {
+    if (!this->isValidRoom(room)) {
         std::cout << "[-] Invalid room!" << std::endl;
         return;
     }
@@ -88,7 +85,7 @@ void EmulatorController::handleRoom(const std::vector<uint8_t>& room) {
     
     std::thread cpuTest(&EmulatorController::mockCPU, this, room);
     
-    cpuTest.detach();
+    cpuTest.detach(); 
 }
 
 // TODO: Validate not only the header, but total size and other aspects too...
@@ -108,15 +105,15 @@ bool EmulatorController::isValidRoom(const std::vector<uint8_t>& room) {
 
 // This should be (obviously) removed after all CPU tests
 void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
-    std::vector<uint8_t> mockedMemory(0xFFFF);
-    
-    if (room.size() > 0xFFFF) {
+    if (room.size() > 0xFFFF + 1) {
         std::cout << "Invalid room size!" << std::endl;
         return;
     }
 
+    std::vector<uint8_t> mockedMemory(0xFFFF + 1); // 0 to 0xFFFF
+    
     std::copy(room.begin(), room.end(), mockedMemory.begin());
-
+    
     CPU cpu(mockedMemory);
     
     this->interface->setDebuggerScreenCpuInfo(      

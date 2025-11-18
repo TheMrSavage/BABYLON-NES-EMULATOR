@@ -6,7 +6,6 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <iterator>
 #include <nfd.h>
 #include <queue>
 #include <vector>
@@ -118,7 +117,7 @@ void MainScreen::randomizeMatrix() {
     SDL_UnlockTexture(this->GAME_DRAW_PIXEL_MATRIX);
 }
 
-std::vector<unsigned char> MainScreen::openFileFunction() {
+std::vector<uint8_t> MainScreen::openFileFunction() {
     nfdchar_t * roomPath = nullptr;
     nfdresult_t result = NFD_OpenDialog(nullptr, nullptr, &roomPath);
 
@@ -128,13 +127,18 @@ std::vector<unsigned char> MainScreen::openFileFunction() {
         free(roomPath);
 
         if (room) {
-            const std::vector<unsigned char> roomData(std::istream_iterator<char>(room), {});
+            std::vector<uint8_t> roomData;
+            char byte;
+
+            while (room.get(byte)) {
+                roomData.push_back(byte);
+            }
 
             return roomData;
         }
     }
     
-    return std::vector<unsigned char>();
+    return std::vector<uint8_t>();
 }
 
 MainScreen::~MainScreen() {
