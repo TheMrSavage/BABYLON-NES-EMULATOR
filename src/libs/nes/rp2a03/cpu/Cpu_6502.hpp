@@ -58,7 +58,7 @@
             void ASL(); // For accumulator mode
             uint8_t BCC(int8_t relativeJump);
             uint8_t BCS(int8_t relativeJump);
-            void BEQ(uint16_t data);
+            uint8_t BEQ(int8_t relativeJump);
             void BIT(uint16_t data);
             void BMI(uint16_t data);
             void BNE(uint16_t data);

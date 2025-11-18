@@ -359,8 +359,9 @@ int CPU::executeNextInstruction() {
                       
         case BEQ_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BEQ(addressToFetchData);
-            return 2;
+            data = this->fetchByteAt(addressToFetchData);
+            uint8_t result = this->BEQ(data);
+            return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BIT_ZERO_PAGE: {
@@ -1233,8 +1234,19 @@ uint8_t CPU::BCS(int8_t relativeJump) {
     return oldPage != newPage ? 2 : 1;
 }
 
-//TODO: Implement
-void CPU::BEQ(uint16_t data){}
+// Done
+// "If the zero flag is set then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BEQ(int8_t relativeJump){
+    if ( (this->p & P_FLAG_ZERO) == 0) return 0;
+    
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 //  Done
 // "This instructions is used to test if one or more bits are set in a target memory location. The mask pattern in A is ANDed with the value in memory to set or clear the zero flag, but the result is not kept. Bits 7 and 6 of the value from memory are copied into the N and V flags."
