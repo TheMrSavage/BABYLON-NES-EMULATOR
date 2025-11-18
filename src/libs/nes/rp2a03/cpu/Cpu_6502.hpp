@@ -56,7 +56,7 @@
             void AND(uint8_t data);
             void ASL(uint16_t memoryAddress);
             void ASL(); // For accumulator mode
-            void BCC(uint16_t data);
+            uint8_t BCC(int8_t relativeJump);
             void BCS(uint16_t data);
             void BEQ(uint16_t data);
             void BIT(uint16_t data);

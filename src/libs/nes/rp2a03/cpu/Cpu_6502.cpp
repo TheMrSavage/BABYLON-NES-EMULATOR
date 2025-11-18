@@ -202,782 +202,934 @@ int CPU::executeNextInstruction() {
     uint16_t addressToFetchData;
 
     switch (opcode) {
-        case ADC_IMMEDIATE:
+        case ADC_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 2; 
+            return 2;
+		} 
               
-        case ADC_ZERO_PAGE:
+        case ADC_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case ADC_ZERO_PAGE_X:
+        case ADC_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case ADC_ABSOLUTE:
+        case ADC_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case ADC_ABSOLUTE_X:
+        case ADC_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case ADC_ABSOLUTE_Y:
+        case ADC_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case ADC_INDIRECT_X:
+        case ADC_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 6; 
+            return 6;
+		} 
                       
-        case ADC_INDIRECT_Y:
+        case ADC_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case AND_IMMEDIATE:
+        case AND_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case AND_ZERO_PAGE:
+        case AND_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case AND_ZERO_PAGE_X:
+        case AND_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case AND_ABSOLUTE:
+        case AND_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case AND_ABSOLUTE_X:
+        case AND_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case AND_ABSOLUTE_Y:
+        case AND_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case AND_INDIRECT_X:
+        case AND_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 6; 
+            return 6;
+		} 
                       
-        case AND_INDIRECT_Y:
+        case AND_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case ASL_ACCUMULATOR:
+        case ASL_ACCUMULATOR: {
             this->ASL();
-            return 2; 
+            return 2;
+		} 
                       
-        case ASL_ZERO_PAGE:
+        case ASL_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->ASL(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case ASL_ZERO_PAGE_X:
+        case ASL_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->ASL(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ASL_ABSOLUTE:
+        case ASL_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->ASL(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ASL_ABSOLUTE_X:
+        case ASL_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->ASL(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case BCC_RELATIVE:
+        case BCC_RELATIVE : {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BCC(addressToFetchData);
-            return 2; // (+1 if branch succeeds+2 if to a new page)
-                      
-        case BCS_RELATIVE:
+            uint8_t result = this->BCC(addressToFetchData);
+            return 2 + result; // (+1 if branch succeeds+2 if to a new page)
+         }
+
+        case BCS_RELATIVE: { 
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BCS(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BEQ_RELATIVE:
+        case BEQ_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BEQ(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BIT_ZERO_PAGE:
+        case BIT_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->BIT(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case BIT_ABSOLUTE:
+        case BIT_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->BIT(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case BMI_RELATIVE:
+        case BMI_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BMI(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BNE_RELATIVE:
+        case BNE_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BNE(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BPL_RELATIVE:
+        case BPL_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BPL(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BRK_IMPLIED:
+        case BRK_IMPLIED: {
             addressToFetchData = this->getNextAddress(IMPLIED);
             this->BRK(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case BVC_RELATIVE:
+        case BVC_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BVC(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case BVS_RELATIVE:
+        case BVS_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             this->BVS(addressToFetchData);
-            return 2; // (+1 if branch succeeds +2 if to a new page)
+            return 2;
+		} // (+1 if branch succeeds +2 if to a new page)
                       
-        case CLC_IMPLIED:
+        case CLC_IMPLIED: {
             this->CLC();
-            return 2; 
+            return 2;
+		} 
                       
-        case CLD_IMPLIED:
+        case CLD_IMPLIED: {
             this->CLD();
-            return 2; 
+            return 2;
+		} 
                       
-        case CLI_IMPLIED:
+        case CLI_IMPLIED: {
             this->CLI();
-            return 2; 
+            return 2;
+		} 
                       
-        case CLV_IMPLIED:
+        case CLV_IMPLIED: {
             this->CLV();
-            return 2; 
+            return 2;
+		} 
                       
-        case CMP_IMMEDIATE:
+        case CMP_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case CMP_ZERO_PAGE:
+        case CMP_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case CMP_ZERO_PAGE_X:
+        case CMP_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case CMP_ABSOLUTE:
+        case CMP_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case CMP_ABSOLUTE_X:
+        case CMP_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case CMP_ABSOLUTE_Y:
+        case CMP_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case CMP_INDIRECT_X:
+        case CMP_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 6; 
+            return 6;
+		} 
                       
-        case CMP_INDIRECT_Y:
+        case CMP_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case CPX_IMMEDIATE:
+        case CPX_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case CPX_ZERO_PAGE:
+        case CPX_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case CPX_ABSOLUTE:
+        case CPX_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case CPY_IMMEDIATE:
+        case CPY_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case CPY_ZERO_PAGE:
+        case CPY_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case CPY_ABSOLUTE:
+        case CPY_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case DEC_ZERO_PAGE:
+        case DEC_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->DEC(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case DEC_ZERO_PAGE_X:
+        case DEC_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->DEC(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case DEC_ABSOLUTE:
+        case DEC_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->DEC(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case DEC_ABSOLUTE_X:
+        case DEC_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->DEC(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case DEX_IMPLIED:
+        case DEX_IMPLIED: {
             this->DEX();
-            return 2; 
+            return 2;
+		} 
                       
-        case DEY_IMPLIED:
+        case DEY_IMPLIED: {
             this->DEY();
-            return 2; 
+            return 2;
+		} 
                       
-        case EOR_IMMEDIATE:
+        case EOR_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case EOR_ZERO_PAGE:
+        case EOR_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case EOR_ZERO_PAGE_X:
+        case EOR_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case EOR_ABSOLUTE:
+        case EOR_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case EOR_ABSOLUTE_X:
+        case EOR_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case EOR_ABSOLUTE_Y:
+        case EOR_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case EOR_INDIRECT_X:
+        case EOR_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 6; 
+            return 6;
+		} 
                       
-        case EOR_INDIRECT_Y:
+        case EOR_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case INC_ZERO_PAGE:
+        case INC_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->INC(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case INC_ZERO_PAGE_X:
+        case INC_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->INC(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case INC_ABSOLUTE:
+        case INC_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->INC(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case INC_ABSOLUTE_X:
+        case INC_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->INC(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case INX_IMPLIED:
+        case INX_IMPLIED: {
             this->INX();
-            return 2; 
+            return 2;
+		} 
                       
-        case INY_IMPLIED:
+        case INY_IMPLIED: {
             this->INY();
-            return 2; 
+            return 2;
+		} 
                       
-        case JMP_ABSOLUTE:
+        case JMP_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->JMP(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case JMP_INDIRECT:
+        case JMP_INDIRECT: {
             addressToFetchData = this->getNextAddress(INDIRECT);
             this->JMP(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case JSR_ABSOLUTE:
+        case JSR_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->JSR(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case LDA_IMMEDIATE:
+        case LDA_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             this->LDA(addressToFetchData);
-            return 2; 
+            return 2;
+		} 
                       
-        case LDA_ZERO_PAGE:
+        case LDA_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->LDA(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case LDA_ZERO_PAGE_X:
+        case LDA_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->LDA(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDA_ABSOLUTE:
+        case LDA_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->LDA(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDA_ABSOLUTE_X:
+        case LDA_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->LDA(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case LDA_ABSOLUTE_Y:
+        case LDA_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             this->LDA(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case LDA_INDIRECT_X:
+        case LDA_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             this->LDA(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case LDA_INDIRECT_Y:
+        case LDA_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             this->LDA(addressToFetchData);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case LDX_IMMEDIATE:
+        case LDX_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             this->LDX(addressToFetchData);
-            return 2; 
+            return 2;
+		} 
                       
-        case LDX_ZERO_PAGE:
+        case LDX_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->LDX(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case LDX_ZERO_PAGE_Y:
+        case LDX_ZERO_PAGE_Y: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_Y);
             this->LDX(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDX_ABSOLUTE:
+        case LDX_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->LDX(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDX_ABSOLUTE_Y:
+        case LDX_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             this->LDX(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case LDY_IMMEDIATE:
+        case LDY_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             this->LDY(addressToFetchData);
-            return 2; 
+            return 2;
+		} 
                       
-        case LDY_ZERO_PAGE:
+        case LDY_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->LDY(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case LDY_ZERO_PAGE_X:
+        case LDY_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->LDY(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDY_ABSOLUTE:
+        case LDY_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->LDY(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case LDY_ABSOLUTE_X:
+        case LDY_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->LDY(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case LSR_ACCUMULATOR:
+        case LSR_ACCUMULATOR: {
             this->LSR();
-            return 2; 
+            return 2;
+		} 
                       
-        case LSR_ZERO_PAGE:
+        case LSR_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->LSR(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case LSR_ZERO_PAGE_X:
+        case LSR_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->LSR(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case LSR_ABSOLUTE:
+        case LSR_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->LSR(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case LSR_ABSOLUTE_X:
+        case LSR_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->LSR(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case NOP_IMPLIED:
+        case NOP_IMPLIED: {
             this->NOP();
-            return 2; 
+            return 2;
+		} 
                       
-        case ORA_IMMEDIATE:
+        case ORA_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 2; 
+            return 2;
+		} 
                       
-        case ORA_ZERO_PAGE:
+        case ORA_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 3; 
+            return 3;
+		} 
                       
-        case ORA_ZERO_PAGE_X:
+        case ORA_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case ORA_ABSOLUTE:
+        case ORA_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 4; 
+            return 4;
+		} 
                       
-        case ORA_ABSOLUTE_X:
+        case ORA_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case ORA_ABSOLUTE_Y:
+        case ORA_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case ORA_INDIRECT_X:
+        case ORA_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 6; 
+            return 6;
+		} 
                       
-        case ORA_INDIRECT_Y:
+        case ORA_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case PHA_IMPLIED:
+        case PHA_IMPLIED: {
             this->PHA();
-            return 3; 
+            return 3;
+		} 
                       
-        case PHP_IMPLIED:
+        case PHP_IMPLIED: {
             this->PHP();
-            return 3; 
+            return 3;
+		} 
                       
-        case PLA_IMPLIED:
+        case PLA_IMPLIED: {
             this->PLA();
-            return 4; 
+            return 4;
+		} 
                       
-        case PLP_IMPLIED:
+        case PLP_IMPLIED: {
             this->PLP();
-            return 4; 
+            return 4;
+		} 
                       
-        case ROL_ACCUMULATOR:
+        case ROL_ACCUMULATOR: {
             this->ROL();
-            return 2; 
+            return 2;
+		} 
                       
-        case ROL_ZERO_PAGE:
+        case ROL_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->ROL(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case ROL_ZERO_PAGE_X:
+        case ROL_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->ROL(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ROL_ABSOLUTE:
+        case ROL_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->ROL(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ROL_ABSOLUTE_X:
+        case ROL_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->ROL(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case ROR_ACCUMULATOR:
+        case ROR_ACCUMULATOR: {
             this->ROR();
-            return 2; 
+            return 2;
+		} 
                       
-        case ROR_ZERO_PAGE:
+        case ROR_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->ROR(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case ROR_ZERO_PAGE_X:
+        case ROR_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->ROR(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ROR_ABSOLUTE:
+        case ROR_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->ROR(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case ROR_ABSOLUTE_X:
+        case ROR_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->ROR(addressToFetchData);
-            return 7; 
+            return 7;
+		} 
                       
-        case RTI_IMPLIED:
+        case RTI_IMPLIED: {
             this->RTI();
-            return 6; 
+            return 6;
+		} 
                       
-        case RTS_IMPLIED:
+        case RTS_IMPLIED: {
             this->RTS();
-            return 6; 
+            return 6;
+		} 
                       
-        case SBC_IMMEDIATE:
+        case SBC_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
             this->SBC(addressToFetchData);
-            return 2; 
+            return 2;
+		} 
                       
-        case SBC_ZERO_PAGE:
+        case SBC_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->SBC(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case SBC_ZERO_PAGE_X:
+        case SBC_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->SBC(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case SBC_ABSOLUTE:
+        case SBC_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->SBC(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case SBC_ABSOLUTE_X:
+        case SBC_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->SBC(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case SBC_ABSOLUTE_Y:
+        case SBC_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             this->SBC(addressToFetchData);
-            return 4; // (+1 if page crossed)
+            return 4;
+		} // (+1 if page crossed)
                       
-        case SBC_INDIRECT_X:
+        case SBC_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             this->SBC(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case SBC_INDIRECT_Y:
+        case SBC_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             this->SBC(addressToFetchData);
-            return 5; // (+1 if page crossed)
+            return 5;
+		} // (+1 if page crossed)
                       
-        case SEC_IMPLIED:
+        case SEC_IMPLIED: {
             this->SEC();
-            return 2; 
+            return 2;
+		} 
                       
-        case SED_IMPLIED:
+        case SED_IMPLIED: {
             this->SED();
-            return 2; 
+            return 2;
+		} 
                       
-        case SEI_IMPLIED:
+        case SEI_IMPLIED: {
             this->SEI();
-            return 2; 
+            return 2;
+		} 
                       
-        case STA_ZERO_PAGE:
+        case STA_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->STA(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case STA_ZERO_PAGE_X:
+        case STA_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->STA(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case STA_ABSOLUTE:
+        case STA_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->STA(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case STA_ABSOLUTE_X:
+        case STA_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
             this->STA(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case STA_ABSOLUTE_Y:
+        case STA_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
             this->STA(addressToFetchData);
-            return 5; 
+            return 5;
+		} 
                       
-        case STA_INDIRECT_X:
+        case STA_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
             this->STA(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case STA_INDIRECT_Y:
+        case STA_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
             this->STA(addressToFetchData);
-            return 6; 
+            return 6;
+		} 
                       
-        case STX_ZERO_PAGE:
+        case STX_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->STX(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case STX_ZERO_PAGE_Y:
+        case STX_ZERO_PAGE_Y: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_Y);
             this->STX(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case STX_ABSOLUTE:
+        case STX_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->STX(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case STY_ZERO_PAGE:
+        case STY_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
             this->STY(addressToFetchData);
-            return 3; 
+            return 3;
+		} 
                       
-        case STY_ZERO_PAGE_X:
+        case STY_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
             this->STY(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case STY_ABSOLUTE:
+        case STY_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
             this->STY(addressToFetchData);
-            return 4; 
+            return 4;
+		} 
                       
-        case TAX_IMPLIED:
+        case TAX_IMPLIED: {
             this->TAX();
-            return 2; 
+            return 2;
+		} 
                       
-        case TAY_IMPLIED:
+        case TAY_IMPLIED: {
             this->TAY();
-            return 2; 
+            return 2;
+		} 
                       
-        case TSX_IMPLIED:
+        case TSX_IMPLIED: {
             this->TSX();
-            return 2; 
+            return 2;
+		} 
                       
-        case TXA_IMPLIED:
+        case TXA_IMPLIED: {
             this->TXA();
-            return 2; 
+            return 2;
+		} 
                       
-        case TXS_IMPLIED:
+        case TXS_IMPLIED: {
             this->TXS();
-            return 2; 
+            return 2;
+		} 
                       
-        case TYA_IMPLIED:
+        case TYA_IMPLIED: {
             this->TYA();
-            return 2; 
+            return 2;
+		} 
 
-        default:
+        default : {
             return 0;
             // throw std::runtime_error("Invalid opcode. Exiting...");
+        }
     }
 }
 
@@ -1051,8 +1203,19 @@ void CPU::ASL(){
     this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
-//TODO: Implement
-void CPU::BCC(uint16_t data){}
+//
+// "If the carry flag is clear then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BCC(int8_t relativeJump){
+    if ( (this->p & P_FLAG_CARRY) != 0) return 0;
+    
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 //TODO: Implement
 void CPU::BCS(uint16_t data){}
