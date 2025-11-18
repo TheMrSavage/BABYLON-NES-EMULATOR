@@ -385,8 +385,9 @@ int CPU::executeNextInstruction() {
                       
         case BNE_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BNE(addressToFetchData);
-            return 2;
+            data = this->fetchByteAt(addressToFetchData);
+            uint8_t result = this->BNE(data);
+            return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BPL_RELATIVE: {
@@ -1277,8 +1278,19 @@ uint8_t CPU::BMI(int8_t relativeJump){
     return oldPage != newPage ? 2 : 1;
 }
 
-//TODO: Implement
-void CPU::BNE(uint16_t data){}
+// Done
+// "If the zero flag is clear then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BNE(int8_t relativeJump){
+    if ( (this->p & P_FLAG_ZERO) != 0) return 0;
+
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 //TODO: Implement
 void CPU::BPL(uint16_t data){}
