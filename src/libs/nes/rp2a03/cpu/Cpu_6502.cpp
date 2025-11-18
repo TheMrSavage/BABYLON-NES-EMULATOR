@@ -412,8 +412,9 @@ int CPU::executeNextInstruction() {
                       
         case BVS_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BVS(addressToFetchData);
-            return 2;
+            data = this->fetchByteAt(addressToFetchData);
+            uint8_t result = this->BVS(data);
+            return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case CLC_IMPLIED: {
@@ -1325,8 +1326,19 @@ uint8_t CPU::BVC(int8_t relativeJump){
     return oldPage != newPage ? 2 : 1;
 }
 
-//TODO: Implement
-void CPU::BVS(uint16_t data){}
+// Done
+// "If the overflow flag is set then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BVS(int8_t relativeJump){
+    if ( (this->p & P_FLAG_OVERFLOW) == 0) return 0;
+    
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 // Done
 // "Set the carry flag to zero."
