@@ -60,7 +60,7 @@
             uint8_t BCS(int8_t relativeJump);
             uint8_t BEQ(int8_t relativeJump);
             void BIT(uint16_t data);
-            void BMI(uint16_t data);
+            uint8_t BMI(int8_t data);
             void BNE(uint16_t data);
             void BPL(uint16_t data);
             void BRK(uint16_t data);

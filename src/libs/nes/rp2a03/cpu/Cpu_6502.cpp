@@ -378,8 +378,9 @@ int CPU::executeNextInstruction() {
                       
         case BMI_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BMI(addressToFetchData);
-            return 2;
+            data = this->fetchByteAt(addressToFetchData);
+            uint8_t result = this->BMI(data);
+            return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BNE_RELATIVE: {
@@ -1262,8 +1263,19 @@ void CPU::BIT(uint16_t memoryAddress){
     this->p |= data & (P_FLAG_OVERFLOW | P_FLAG_NEGATIVE); 
 }
 
-//TODO: Implement
-void CPU::BMI(uint16_t data){}
+// Done
+// "If the negative flag is set then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BMI(int8_t relativeJump){
+    if ( (this->p & P_FLAG_NEGATIVE) == 0) return 0;
+    
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 //TODO: Implement
 void CPU::BNE(uint16_t data){}
