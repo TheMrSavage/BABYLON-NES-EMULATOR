@@ -405,8 +405,9 @@ int CPU::executeNextInstruction() {
                       
         case BVC_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
-            this->BVC(addressToFetchData);
-            return 2;
+            data = this->fetchByteAt(addressToFetchData);
+            uint8_t result = this->BVC(data);
+            return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BVS_RELATIVE: {
@@ -1310,8 +1311,19 @@ uint8_t CPU::BPL(int8_t relativeJump){
 //TODO: Implement
 void CPU::BRK(uint16_t data){}
 
-//TODO: Implement
-void CPU::BVC(uint16_t data){}
+// Done
+// "If the overflow flag is clear then add the relative displacement to the program counter to cause a branch to a new location."
+uint8_t CPU::BVC(int8_t relativeJump){
+    if ( (this->p & P_FLAG_OVERFLOW) != 0) return 0;
+    
+    uint8_t oldPage = ( (this->pc & 0xFF00) >> 8);
+
+    this->pc += relativeJump;
+    
+    uint8_t newPage = ( (this->pc & 0xFF00) >> 8);
+
+    return oldPage != newPage ? 2 : 1;
+}
 
 //TODO: Implement
 void CPU::BVS(uint16_t data){}
