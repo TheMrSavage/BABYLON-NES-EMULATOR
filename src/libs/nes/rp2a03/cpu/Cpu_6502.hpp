@@ -63,7 +63,7 @@
             uint8_t BMI(int8_t relativeJump);
             uint8_t BNE(int8_t relativeJump);
             uint8_t BPL(int8_t relativeJump);
-            void BRK(uint16_t data);
+            void BRK();
             uint8_t BVC(int8_t relativeJump);
             uint8_t BVS(int8_t relativeJump);
             void CLC();

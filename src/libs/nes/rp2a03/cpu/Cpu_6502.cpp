@@ -398,8 +398,7 @@ int CPU::executeNextInstruction() {
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BRK_IMPLIED: {
-            addressToFetchData = this->getNextAddress(IMPLIED);
-            this->BRK(addressToFetchData);
+            this->BRK();
             return 7;
 		} 
                       
@@ -1317,8 +1316,24 @@ uint8_t CPU::BPL(int8_t relativeJump){
     return oldPage != newPage ? 2 : 1;
 }
 
-//TODO: Implement
-void CPU::BRK(uint16_t data){}
+// Done
+// "The BRK instruction forces the generation of an interrupt request. The program counter and processor status are pushed on the stack then the IRQ interrupt vector at $FFFE/F is loaded into the PC and the break flag in the status set to one."
+void CPU::BRK(){
+    uint8_t pcMSB = ( (this->pc + 1) & 0xFF00) >> 8;
+    uint8_t pcLSB = ( (this->pc + 1) & 0xFF);
+
+    this->stackPush(pcMSB);
+    this->stackPush(pcLSB);
+
+    this->stackPush(this->p | P_FLAG_B | P_FLAG_ALWAYS_ONE);
+
+    uint8_t LSB = this->fetchByteAt(0xFFFE);
+    uint8_t MSB = this->fetchByteAt(0xFFFF);
+
+    this->pc = (MSB << 8) | LSB;
+
+    this->p |= P_FLAG_INTERRUPT_DISABLE;
+}
 
 // Done
 // "If the overflow flag is clear then add the relative displacement to the program counter to cause a branch to a new location."
@@ -1733,6 +1748,8 @@ void CPU::ROR(uint16_t memoryAddress){
     this->writeByteAt(memoryAddress, data);
 }
 
+// Done
+// "Move each of the bits in either A or M one place to the right. Bit 7 is filled with the current value of the carry flag whilst the old bit 0 becomes the new carry flag value."
 void CPU::ROR(){
     uint8_t newCarryFlag = (this->acc & P_FLAG_CARRY);
 
