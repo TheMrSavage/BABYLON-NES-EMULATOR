@@ -99,7 +99,7 @@
             void ROR(); // For accumulator
             void RTI();
             void RTS();
-            void SBC(uint16_t data);
+            void SBC(uint8_t data);
             void SEC();
             void SED();
             void SEI();

@@ -965,49 +965,57 @@ int CPU::executeNextInstruction() {
                       
         case SBC_IMMEDIATE: {
             addressToFetchData = this->getNextAddress(IMMEDIATE);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 2;
 		} 
                       
         case SBC_ZERO_PAGE: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 3;
 		} 
                       
         case SBC_ZERO_PAGE_X: {
             addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 4;
 		} 
                       
         case SBC_ABSOLUTE: {
             addressToFetchData = this->getNextAddress(ABSOLUTE);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 4;
 		} 
                       
         case SBC_ABSOLUTE_X: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_X);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case SBC_ABSOLUTE_Y: {
             addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case SBC_INDIRECT_X: {
             addressToFetchData = this->getNextAddress(INDIRECT_X);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 6;
 		} 
                       
         case SBC_INDIRECT_Y: {
             addressToFetchData = this->getNextAddress(INDIRECT_Y);
-            this->SBC(addressToFetchData);
+			data = this->fetchByteAt(addressToFetchData);
+            this->SBC(data);
             return 5;
 		} // (+1 if page crossed)
                       
@@ -1777,8 +1785,11 @@ void CPU::RTS(){
     this->pc = ( (MSB << 8) | LSB) + 1;
 }
 
-//TODO: Implement
-void CPU::SBC(uint16_t data){}
+// Done
+// "This instruction subtracts the contents of a memory location to the accumulator together with the not of the carry bit. If overflow occurs the carry bit is clear, this enables multiple byte subtraction to be performed."
+void CPU::SBC(uint8_t data){
+    this->ADC(~data);
+}
 
 // Done
 // "Set the carry flag to one."
