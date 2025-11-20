@@ -88,15 +88,17 @@ void DebuggerScreen::showStatusRegisterInfo () {
     uint8_t interruptDisable    = statusRegister & 0b00000100; 
     uint8_t decimal             = statusRegister & 0b00001000; 
     uint8_t bFlag               = statusRegister & 0b00010000; 
+    uint8_t alwaysOneFlag       = statusRegister & 0b00100000;
     uint8_t overflow            = statusRegister & 0b01000000; 
     uint8_t negative            = statusRegister & 0b10000000; 
     
-    ImGui::TextWrapped("Carry Flag: %s | Zero flag: %s | Interrupt Disable flag: %s | Decimal flag: %s | B Flag: %s | Overflow flag: %s | Negative flag: %s" ,
+    ImGui::TextWrapped("Carry Flag: %s | Zero flag: %s | Interrupt Disable flag: %s | Decimal flag: %s | B Flag: %s | Always One flag: %s | Overflow flag: %s | Negative flag: %s" ,
             OnOffString(carry),
             OnOffString(zero),
             OnOffString(interruptDisable),
             OnOffString(decimal),
             OnOffString(bFlag),
+            OnOffString(alwaysOneFlag),
             OnOffString(overflow),
             OnOffString(negative)
         );

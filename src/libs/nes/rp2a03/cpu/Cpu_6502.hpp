@@ -16,11 +16,11 @@
     #include "instructions/InstructionsOpcodeEnum.hpp"
     class CPU{
         private:
-            uint16_t pc;
-            uint8_t sp;
-            uint8_t acc;
-            uint8_t idX;
-            uint8_t idY;
+            uint16_t pc = 0;
+            uint8_t sp = 0;
+            uint8_t acc = 0;
+            uint8_t idX = 0;
+            uint8_t idY = 0;
             
             // From https://www.nesdev.org/wiki/Status_flags:
             /*
@@ -37,7 +37,7 @@
                 |+-------- Overflow
                 +--------- Negative
              */
-            uint8_t p;            
+            uint8_t p = 0;            
 
             std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
             
@@ -128,7 +128,12 @@
             // "Pushing bytes to the stack causes the stack pointer to be decremented. Conversely pulling bytes causes it to be incremented."
             CPU(std::vector<uint8_t>& memory) : memory(memory){
                 this->sp = 0xFF;               
+                this->p |= P_FLAG_ALWAYS_ONE;
                 
+                uint8_t pcLSB = this->memory[0xFFFC];
+                uint8_t pcMSB = this->memory[0xFFFD];
+
+                this->pc = (pcMSB << 8) | pcLSB;
             };
     };
 #endif
