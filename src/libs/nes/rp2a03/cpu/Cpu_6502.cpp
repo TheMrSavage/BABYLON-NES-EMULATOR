@@ -393,7 +393,7 @@ int CPU::executeNextInstruction() {
         case BPL_RELATIVE: {
             addressToFetchData = this->getNextAddress(RELATIVE);
             data = this->fetchByteAt(addressToFetchData);
-            uint8_t result = this->BPL(addressToFetchData);
+            uint8_t result = this->BPL(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
@@ -1142,8 +1142,8 @@ int CPU::executeNextInstruction() {
 		} 
 
         default : {
-            return 0;
-            // throw std::runtime_error("Invalid opcode. Exiting...");
+            // TODO: Create a specific exception for invalid opcode
+            throw std::runtime_error("Invalid opcode. Exiting...");
         }
     }
 }
@@ -1192,29 +1192,25 @@ void CPU::AND(uint8_t data){
 // "This operation shifts all the bits of the accumulator or memory contents one bit left. Bit 0 is set to 0 and bit 7 is placed in the carry flag. The effect of this operation is to multiply the memory contents by 2 (ignoring 2's complement considerations), setting the carry if the result will not fit in 8 bits."
 void CPU::ASL(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
-
-    this->p |= (data & P_FLAG_NEGATIVE);
     
-    this->p &= 0b01111100;
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    this->p |= ( (data & P_FLAG_NEGATIVE) >> 7);  
 
     data <<= 1;
 
     if (data == 0) this->p |= P_FLAG_ZERO;
-  
     this->p |= data & P_FLAG_NEGATIVE;
-
+  
     this->writeByteAt(memoryAddress, data);
 }
 
 void CPU::ASL(){
-    this->p |= (this->acc & P_FLAG_NEGATIVE);
+    this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
+    this->p |= ( (this->acc & P_FLAG_NEGATIVE) >> 7);
     
     this->acc <<= 1;
     
-    this->p &= 0b01111100;
-
     if (this->acc == 0) this->p |= P_FLAG_ZERO;
-  
     this->p |= this->acc & P_FLAG_NEGATIVE;
 }
 
@@ -1666,7 +1662,7 @@ void CPU::PHA(){
 // Done
 // "Pushes a copy of the status flags on to the stack."
 void CPU::PHP(){
-    this->stackPush(this->p | 0b00110000);
+    this->stackPush( (this->p | P_FLAG_ALWAYS_ONE) & ~P_FLAG_B);
 }
 
 // Done
@@ -1690,7 +1686,7 @@ void CPU::PLA(){
 void CPU::PLP(){
     uint8_t value = this->stackPop();
        
-    this->p = value;
+    this->p = ( (value | P_FLAG_ALWAYS_ONE) & ~P_FLAG_B );
 }
 
 // Done 
