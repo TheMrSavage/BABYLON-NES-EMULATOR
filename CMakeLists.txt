@@ -18,8 +18,15 @@ add_subdirectory(cmake/dependencies)
 add_subdirectory(cmake/libs)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
-add_executable(BABYLON src/main.cpp)
 
-target_include_directories(BABYLON PUBLIC src/libs)
+if (DEFINED BUILD_TESTS)
+    add_executable(Tests src/tests/tests.cpp)
+    add_subdirectory(cmake/dependencies/json)
+    target_include_directories(Tests PUBLIC src/libs)
+    target_link_libraries(Tests PRIVATE Cpu)
+else ()
+    add_executable(BABYLON src/main.cpp)
+    target_include_directories(BABYLON PUBLIC src/libs)
+    target_link_libraries(BABYLON PRIVATE Controller)
+endif()
 
-target_link_libraries(BABYLON PRIVATE Controller)

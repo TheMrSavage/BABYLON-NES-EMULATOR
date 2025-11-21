@@ -38,7 +38,7 @@
                 +--------- Negative
              */
             uint8_t p = 0;            
-
+            
             std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
             
             uint8_t stackPop();
@@ -113,6 +113,7 @@
             void TXS();
             void TYA();
         public:
+            // TODO: Create an properly logic to communicate with debugger and event system
             // This must be used by debugger only!
             uint16_t& returnPc();
             uint8_t& returnSp();
@@ -123,6 +124,14 @@
             const std::vector<uint8_t>& returnMemory();
             
             int executeNextInstruction();
+            
+            // TODO: Move this to .cpp
+            void setPc(uint16_t value) {this->pc = value;}
+            void setSp(uint8_t value) {this->sp = value;}
+            void setAcc(uint8_t value) {this->acc = value;}
+            void setIdX(uint8_t value) {this->idX = value;}
+            void setIdY(uint8_t value) {this->idY = value;}
+            void setP(uint8_t value) {this->p = value;}
             
             // "The processor supports a 256 byte stack located between $0100 and $01FF. The stack pointer is an 8 bit register and holds the low 8 bits of the next free location on the stack. The location of the stack is fixed and cannot be moved."
             // "Pushing bytes to the stack causes the stack pointer to be decremented. Conversely pulling bytes causes it to be incremented."
