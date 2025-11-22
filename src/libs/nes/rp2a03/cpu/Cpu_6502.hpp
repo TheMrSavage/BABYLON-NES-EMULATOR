@@ -16,6 +16,8 @@
     #include "instructions/InstructionsOpcodeEnum.hpp"
     class CPU{
         private:
+            const Bus bus;
+
             uint16_t pc = 0;
             uint8_t sp = 0;
             uint8_t acc = 0;

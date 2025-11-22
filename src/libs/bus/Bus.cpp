@@ -6,8 +6,22 @@ Bus::Bus() : memory(0x10000)  {
 
 }
 
+void Bus::setDebugMode() {
+    this->debbuging = true;
+}
+
 void Bus::writeMemoryAt(uint16_t address, uint8_t data) {
-    this->memory[address] = data
+    this->memory[address] = data;
+    
+    if (this->debbuging) {
+        BUS_OPERATION operation = {
+            address,
+            data,
+            BUS_OPERATION_TYPES_ENUM::BUS_WRITE
+        };
+
+        this->operations.push_back(operation);
+    }
 
     /*
      * TODO: After the debuging on Bus read-write for 6502 tests, start to really work here
@@ -29,7 +43,19 @@ void Bus::writeMemoryAt(uint16_t address, uint8_t data) {
 }
 
 uint8_t Bus::readByteAt(uint16_t address) {
-    return this->memory[address];
+    uint8_t data = this->memory[address];
+
+    if (debbuging) {
+        BUS_OPERATION operation = {
+            address,
+            data,
+            BUS_OPERATION_TYPES_ENUM::BUS_READ
+        };
+
+        this->operations.push_back(operation);
+    }
+
+    return data;
     /*
      * TODO: After the debuging on Bus read-write for 6502 tests, start to really work here
      * if (address <= 0x1FFF) {

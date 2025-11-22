@@ -1,6 +1,7 @@
 #ifndef INSTRUCTIONS_OPCODE_ENUM
     #define INSTRUCTIONS_OPCODE_ENUM
     // Thanks to: https://www.nesdev.org/obelisk-6502-guide/reference.html
+    // TODO: Refactor this to enum class instead of raw enum
     enum ADDRESSING_MODE_ENUM {
         ABSOLUTE_X,
         ABSOLUTE,
