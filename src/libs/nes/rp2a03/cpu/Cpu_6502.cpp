@@ -1605,9 +1605,8 @@ void CPU::LDY(uint16_t memoryAddress){
 void CPU::LSR(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
 
-    this->p |= (data & P_FLAG_CARRY);
-    
     this->p &= 0b01111100;
+    this->p |= (data & P_FLAG_CARRY);
 
     data >>= 1;
 
@@ -1620,11 +1619,10 @@ void CPU::LSR(uint16_t memoryAddress){
 }
 
 void CPU::LSR(){
-    this->p |= (this->acc & P_FLAG_NEGATIVE);
-    
-    this->acc >>= 1;
-    
     this->p &= 0b01111100;
+    this->p |= (this->acc & P_FLAG_CARRY);
+    
+    this->acc >>= 1;   
 
     if (this->acc == 0) this->p |= P_FLAG_ZERO;
   

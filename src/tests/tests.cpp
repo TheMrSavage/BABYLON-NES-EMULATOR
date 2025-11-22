@@ -8,15 +8,17 @@
 #include <fstream>
 #include <nlohmann/json_fwd.hpp>
 #include <ostream>
+#include <set>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
-bool execute6502Test(const nlohmann::json& test) {
+bool execute6502Test(const nlohmann::json& test, std::set<std::string>& invalidOpcodes) {
+    const std::string& testName = test["name"];
+
     try {
          std::vector<uint8_t> memory(0x10000);
-         CPU cpu(memory);
-         
-         const std::string& testName = test["name"];
+         CPU cpu(memory);        
 
          std::cout << "[+] Executing test: " << testName << std::endl;
             
@@ -103,22 +105,31 @@ bool execute6502Test(const nlohmann::json& test) {
     }
     // TODO: Create a specific error for invalid opcode in CPU class
     catch (std::runtime_error error) {
-        std::cout << "[-] Invalid opcode!" << std::endl;
+        std::string opcode;
+
+        opcode += testName.at(0);
+        opcode += testName.at(1);
+
+        std::cout << "[-] Invalid opcode: " << opcode << std::endl;
+        
+        invalidOpcodes.insert(opcode);
     }
     
     std::cout << "[+] Test passed!" << std::endl; 
     return true;
 }
 
-bool execute6502Tests(const nlohmann::json& tests) {
+bool execute6502Tests(const nlohmann::json& tests, std::set<std::string>& invalidOpcodes) {
     for (const auto& test : tests) {
-        if (!execute6502Test(test)) return false;
+        if (!execute6502Test(test, invalidOpcodes)) return false;
     }
 
     return true;
 }
 
 void CPU6502Test(const std::string& testsPath) {
+    std::set<std::string> invalidOpcodes;
+    
     for (const auto& entry : std::filesystem::directory_iterator(testsPath)) {
         const std::string& filePath = entry.path();
 
@@ -128,7 +139,7 @@ void CPU6502Test(const std::string& testsPath) {
         
         nlohmann::json testsJson = nlohmann::json::parse(testFile);
 
-        bool result = execute6502Tests(testsJson);
+        bool result = execute6502Tests(testsJson, invalidOpcodes);
 
         if (!result) {
             std::cout << "[-] Failed at: " << filePath << std::endl;
@@ -139,6 +150,10 @@ void CPU6502Test(const std::string& testsPath) {
         }
         
         std::cout << std::endl;
+    }
+
+    for (const auto& opcode : invalidOpcodes) {
+        std::cout << "[+] To implement: " << opcode << std::endl;
     }
 }
 
