@@ -12,11 +12,11 @@
     #define P_FLAG_NEGATIVE             0b10000000
 
     #include <cstdint>
-    #include <vector>
+    #include <Bus.hpp>
     #include "instructions/InstructionsOpcodeEnum.hpp"
     class CPU{
         private:
-            const Bus bus;
+            Bus& bus;
 
             uint16_t pc = 0;
             uint8_t sp = 0;
@@ -40,8 +40,6 @@
                 +--------- Negative
              */
             uint8_t p = 0;            
-            
-            std::vector<uint8_t>& memory; // This SHOULD BE replaced by a properly BUS.
             
             uint8_t stackPop();
             void stackPush(uint8_t data);
@@ -123,7 +121,6 @@
             uint8_t& returnIdX();
             uint8_t& returnIdY();
             uint8_t& returnP();
-            const std::vector<uint8_t>& returnMemory();
             
             int executeNextInstruction();
             
@@ -137,12 +134,13 @@
             
             // "The processor supports a 256 byte stack located between $0100 and $01FF. The stack pointer is an 8 bit register and holds the low 8 bits of the next free location on the stack. The location of the stack is fixed and cannot be moved."
             // "Pushing bytes to the stack causes the stack pointer to be decremented. Conversely pulling bytes causes it to be incremented."
-            CPU(std::vector<uint8_t>& memory) : memory(memory){
+            CPU(Bus& bus) : bus(bus) {
                 this->sp = 0xFF;               
                 this->p |= P_FLAG_ALWAYS_ONE;
                 
-                uint8_t pcLSB = this->memory[0xFFFC];
-                uint8_t pcMSB = this->memory[0xFFFD];
+                // TODO: Replace this magic numbers with properly macro
+                uint8_t pcLSB = this->bus.fetchByteAt(0xFFFC); 
+                uint8_t pcMSB = this->bus.fetchByteAt(0xFFFD);
 
                 this->pc = (pcMSB << 8) | pcLSB;
             };

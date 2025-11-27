@@ -12,14 +12,21 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <bus/Bus.hpp>
+#include <Bus.hpp>
+
+inline std::string BusOperationTypeString(BUS_OPERATION_TYPES_ENUM x) {
+    return x == BUS_OPERATION_TYPES_ENUM::BUS_WRITE ? "write" : "read";
+}
 
 bool execute6502Test(const nlohmann::json& test, std::set<std::string>& invalidOpcodes) {
     const std::string& testName = test["name"];
 
     try {
-         std::vector<uint8_t> memory(0x10000);
-         CPU cpu(memory);        
-
+         Bus bus;
+        
+         CPU cpu(bus);        
+        
          std::cout << "[+] Executing test: " << testName << std::endl;
             
          uint16_t mockedPc   = test["initial"]["pc"];
@@ -51,10 +58,12 @@ bool execute6502Test(const nlohmann::json& test, std::set<std::string>& invalidO
          cpu.setP(mockedPFlag);
          
          for (const auto& memoryValues : test["initial"]["ram"]) {
-             std::cout << "[+] Writting to memory at " << memoryValues[0] << " value: 0x" << std::hex << (int)memoryValues[1] << std::endl;
+             std::cout << "[+] Writting to memory at " << memoryValues[0] << " value: 0x" << std::hex << (int)memoryValues[1] << std::dec << std::endl;
 
-             memory[memoryValues[0]] = memoryValues[1];
+             bus.writeByteAt(memoryValues[0], memoryValues[1]);
          }
+         
+         bus.setDebugMode();
          
          // TODO: Add a more properly way to debug CPU cycles 
          // IT's interesting that the test suit itself already have a way to test BUS instructions. That's pretty cool
@@ -101,6 +110,37 @@ bool execute6502Test(const nlohmann::json& test, std::set<std::string>& invalidO
              std::cout << "[-] Cpu PFlag != Final PFlag: (" << std::bitset<8>((int)cpuPFlag) << ", " << std::bitset<8>((int)finalPFlag) << ")" << std::endl;
              std::cout << "[-] Failed test: " << testName << std::endl;
              return false;
+         }
+        
+        const std::vector<BUS_OPERATION>& busOperations = bus.returnBusOperations();
+        
+        for (auto& operation : busOperations) {
+            std::cout << "[+] Bus operation: " << operation << std::endl;
+        }
+        
+        for (int i = 0; i < busOperations.size(); i++) {
+            BUS_OPERATION operation = busOperations[i];
+            
+            std::cout << "[+] Current BUS operation: " << operation << std::endl;
+
+            nlohmann::json testReference = test["cycles"][i];
+               
+            std::cout << "[+] Expected BUS operation: (" << (int)testReference[0] << std::dec << ", " << testReference[1] << ", " << testReference[2] << ")" << std::endl; 
+
+            if (operation.address != testReference[0]) {
+                std::cout << "[-] Invalid address of current bus operation and expected final address bus operation: (" << operation.address << ", " << testReference[0] << ")" << std::endl;
+                return false;
+            }
+
+            if (operation.value != testReference[1]) {
+                std::cout << "[-] Invalid value of current bus value and expected final value bus operation: (" << (unsigned int)operation.value << ", " << testReference[1] << ")" << std::endl;
+                return false;
+            }
+
+            if (BusOperationTypeString(operation.type) != testReference[2]) {
+                std::cout << "[-] Invalid operation type of current bus operation and expected final operation bus operation: (" << BusOperationTypeString(operation.type) << ", " << testReference[2] << ")" << std::endl;
+                return false;
+            }
          }
     }
     // TODO: Create a specific error for invalid opcode in CPU class

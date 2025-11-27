@@ -2,13 +2,12 @@
 #include "events.hpp"
 #include "nes/rp2a03/cpu/Cpu_6502.hpp"
 #include <algorithm>
-#include <any>
-#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <bus/Bus.hpp>
 
 EmulatorController::EmulatorController() {
     // this->nes = new Nes;
@@ -112,9 +111,13 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
 
     std::vector<uint8_t> mockedMemory(0xFFFF + 1); // 0 to 0xFFFF
     
-    std::copy(room.begin(), room.end(), mockedMemory.begin());
+    Bus bus;
+
+    bus.loadMemory(room);
+
+    // std::copy(room.begin(), room.end(), mockedMemory.begin());
     
-    CPU cpu(mockedMemory);
+    CPU cpu(bus);
     
     this->interface->setDebuggerScreenCpuInfo(      
         cpu.returnPc(),
@@ -123,7 +126,7 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
         cpu.returnIdX(),
         cpu.returnIdY(),
         cpu.returnP(),
-        cpu.returnMemory()
+        mockedMemory
     );
     
     int cycles = 0;

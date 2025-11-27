@@ -1,16 +1,27 @@
 #include "Bus.hpp"
 #include <cstdint>
+#include <iostream>
+#include <ostream>
 
 // TODO: After debuging the Bus read-write for 6502 tests, change the value to MEMORY_SIZE 
 Bus::Bus() : memory(0x10000)  {
 
 }
 
+
+std::ostream& operator<<(std::ostream& os, const BUS_OPERATION& operation) {
+    return os << "(" << (unsigned int)operation.address << ", " << (unsigned int)operation.value << ", " << (operation.type == BUS_OPERATION_TYPES_ENUM::BUS_READ ? "\"read\"" : "\"write\"") << ")";  
+}
+
+const std::vector<BUS_OPERATION>& Bus::returnBusOperations() {
+    return this->operations;
+}
+
 void Bus::setDebugMode() {
     this->debbuging = true;
 }
 
-void Bus::writeMemoryAt(uint16_t address, uint8_t data) {
+void Bus::writeByteAt(uint16_t address, uint8_t data) {
     this->memory[address] = data;
     
     if (this->debbuging) {
@@ -19,7 +30,7 @@ void Bus::writeMemoryAt(uint16_t address, uint8_t data) {
             data,
             BUS_OPERATION_TYPES_ENUM::BUS_WRITE
         };
-
+        
         this->operations.push_back(operation);
     }
 
@@ -42,7 +53,7 @@ void Bus::writeMemoryAt(uint16_t address, uint8_t data) {
     }*/
 }
 
-uint8_t Bus::readByteAt(uint16_t address) {
+uint8_t Bus::fetchByteAt(uint16_t address) {
     uint8_t data = this->memory[address];
 
     if (debbuging) {
@@ -77,9 +88,9 @@ uint8_t Bus::readByteAt(uint16_t address) {
 
 // Return true if memory was loaded
 bool Bus::loadMemory(const std::vector<uint8_t>& room) {
-    if (room.size() > this->MEMORY_SIZE) return false;
+    // if (room.size() > this->MEMORY_SIZE) return false;
 
-    this->memory.assign(room.begin(), room.end());
-
+    std::copy(room.begin(), room.end(), this->memory.begin());
+    
     return true;
 }

@@ -1,7 +1,6 @@
 #include "Cpu_6502.hpp"
 #include <cstdint>
 #include <stdexcept>
-#include <vector>
 #include "instructions/InstructionsOpcodeEnum.hpp"
 
 uint16_t& CPU::returnPc() {
@@ -28,10 +27,6 @@ uint8_t& CPU::returnP() {
     return this->p;
 }
 
-const std::vector<uint8_t>& CPU::returnMemory() {
-    return this->memory;
-}
-
 uint8_t CPU::fetchNextByte() {
     uint8_t data = this->fetchByteAt(this->pc++);
     return data;
@@ -52,7 +47,7 @@ void CPU::stackPush(uint8_t data) {
 }
 
 void CPU::writeByteAt(uint16_t address, uint8_t data) {
-    this->memory[address] = data;
+    this->bus.writeByteAt(address, data);
 }
 
 // DONE: Implement addressing modes and return the properly address specified by it
@@ -157,7 +152,12 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         // As obelisk guide says: "Indexed indirect addressing is normally used in conjunction with a table of address held on zero page. The address of the table is taken from the instruction and the X register added to it (with zero page wrap around) to give the location of the least significant byte of the target address."
         // This is *not* intuitive, because normal indirect can take *any* address.
         case INDIRECT_X : {
-            uint8_t zeroPageAdress = (this->fetchNextByte() + this->idX) & 0xFF; // Not necessary, but this maybe be more legible 
+            // This is bizarre, but, as 6502 is a very old processor (and, at the time, it is *very* expensive to do fetch + operation at the same clock) it firsts fetch zeroPageAdress, then fetch the address at zeroPageAdress at the same time the zeroPageAdress is calculated with idX.
+            // Basically, the CPU *must* do a read or write operation in a cycle.
+            uint8_t zeroPageAdress = this->fetchNextByte();
+            this->fetchByteAt(zeroPageAdress);
+            
+            zeroPageAdress += this->idX;
             
             uint8_t LSB = this->fetchByteAt(zeroPageAdress);
             uint8_t MSB = this->fetchByteAt( (zeroPageAdress + 1) & 0xFF);
@@ -191,7 +191,7 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
 
 // TODO: Again, this should be replaced with a proper bus
 uint8_t CPU::fetchByteAt(uint16_t address) {
-    return this->memory[address];
+    return this->bus.fetchByteAt(address);
 }
 
 // TODO: As i said below, there's some instructions that recive data and others that recive adresses. For now i'll leave like this and, with time, i'll adjust
@@ -1315,8 +1315,10 @@ uint8_t CPU::BPL(int8_t relativeJump){
 // Done
 // "The BRK instruction forces the generation of an interrupt request. The program counter and processor status are pushed on the stack then the IRQ interrupt vector at $FFFE/F is loaded into the PC and the break flag in the status set to one."
 void CPU::BRK(){
-    uint8_t pcMSB = ( (this->pc + 1) & 0xFF00) >> 8;
-    uint8_t pcLSB = ( (this->pc + 1) & 0xFF);
+    this->fetchNextByte(); // Dummy byte
+
+    uint8_t pcMSB = ( this->pc & 0xFF00) >> 8;
+    uint8_t pcLSB = ( this->pc & 0xFF);
 
     this->stackPush(pcMSB);
     this->stackPush(pcLSB);
