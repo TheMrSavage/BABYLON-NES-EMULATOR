@@ -171,12 +171,24 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         // So, it's basically same logic as X, but added *before*
         // One interesting this: This don't have the same bug as indirect
         case INDIRECT_Y : {
+            bool pageCrossed;
+
             uint8_t zeroPageAdress = this->fetchNextByte(); 
             
             uint8_t LSB = this->fetchByteAt(zeroPageAdress);
             uint8_t MSB = this->fetchByteAt( (zeroPageAdress + 1) & 0xFF);
             
-            address = ( (MSB << 8) | LSB) + this->idY;
+            pageCrossed = ((uint16_t)LSB + this->idY) > 0xFF; 
+            LSB += this->idY;
+            address = (MSB << 8) | LSB;
+            
+            if (pageCrossed) { // For cycle accuracy we need to fetch byte at "wrong" address while putting the carry in final address
+                this->fetchByteAt(address);
+
+                MSB++;
+
+                address = (MSB << 8) | LSB;
+            }
 
             break;
         }
@@ -1193,6 +1205,8 @@ void CPU::AND(uint8_t data){
 void CPU::ASL(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
     
+    this->writeByteAt(memoryAddress, data); // Dummy write
+
     this->p &= ~(P_FLAG_CARRY | P_FLAG_ZERO | P_FLAG_NEGATIVE);
     this->p |= ( (data & P_FLAG_NEGATIVE) >> 7);  
 
@@ -1662,7 +1676,9 @@ void CPU::PHA(){
 // Done
 // "Pushes a copy of the status flags on to the stack."
 void CPU::PHP(){
-    this->stackPush( (this->p | P_FLAG_ALWAYS_ONE) & ~P_FLAG_B);
+    this->fetchByteAt(this->pc); // Dummy read
+    
+    this->stackPush(this->p | P_FLAG_ALWAYS_ONE | P_FLAG_B);
 }
 
 // Done
