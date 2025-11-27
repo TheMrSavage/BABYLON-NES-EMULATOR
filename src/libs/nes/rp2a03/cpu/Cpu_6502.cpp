@@ -1,5 +1,6 @@
 #include "Cpu_6502.hpp"
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include "instructions/InstructionsOpcodeEnum.hpp"
 
@@ -52,7 +53,7 @@ void CPU::writeByteAt(uint16_t address, uint8_t data) {
 
 // DONE: Implement addressing modes and return the properly address specified by it
 // TODO: Figure out how to verify if there's any pagecrossing in *PAGE*/INDIRECT_* instructions. Maybe reference-value return? I think it's a good approach
-uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
+uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode, std::optional<INSTRUCTION_TYPE> instructionType) {
     uint16_t address = 0x0000;
 
     switch (adressingMode) {
@@ -85,7 +86,11 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         
         // " The address calculation wraps around if the sum of the base address and the register exceed $FF. If we repeat the last example but with $FF in the X register then the accumulator will be loaded from $007F (e.g. $80 + $FF => $7F) and not $017F."
         case ZERO_PAGE_X : {
-            address = (this->fetchNextByte() + this->idX) & 0xFF;
+            uint8_t toFetch = this->fetchNextByte();
+            
+            this->fetchByteAt(toFetch); // Dummy read
+
+            address = (toFetch + this->idX) & 0xFF;
             break;
         }
         
@@ -113,19 +118,58 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
         }
 
         case ABSOLUTE_X : {
+            bool pageCrossed;
+
+            INSTRUCTION_TYPE type = INSTRUCTION_TYPE::NONE;
+
+            if (instructionType.has_value()) {
+                type = instructionType.value();
+            }
+
             uint8_t LSB = this->fetchNextByte();
             uint8_t MSB = this->fetchNextByte();
+            
+            pageCrossed = ((uint16_t) LSB + this->idX) > 0xFF;
+            LSB += this->idX;
 
-            address = ( (MSB << 8) | LSB) + this->idX;
+            address = ( (MSB << 8) | LSB);
+            
+            
+            if (pageCrossed || type != INSTRUCTION_TYPE::READONLY) this->fetchByteAt(address);
+
+            if (pageCrossed) {
+                MSB++;
+
+                address = ( (MSB << 8) | LSB);
+            }
 
             break;
         }
 
         case ABSOLUTE_Y : {
+            bool pageCrossed;
+            
+            INSTRUCTION_TYPE type = INSTRUCTION_TYPE::NONE;
+
+            if (instructionType.has_value()) {
+                type = instructionType.value();
+            }
+
             uint8_t LSB = this->fetchNextByte();
             uint8_t MSB = this->fetchNextByte();
+            
+            pageCrossed = ((uint16_t) LSB + this->idY) > 0xFF;
+            LSB += this->idY;
 
-            address = ( (MSB << 8) | LSB) + this->idY;
+            address = ( (MSB << 8) | LSB);
+            
+            if (pageCrossed || type != INSTRUCTION_TYPE::READONLY) this->fetchByteAt(address);
+
+            if (pageCrossed) {
+                MSB++;
+
+                address = ( (MSB << 8) | LSB);
+            }
 
             break;
         }
@@ -201,13 +245,13 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode) {
     return address;
 }
 
-// TODO: Again, this should be replaced with a proper bus
 uint8_t CPU::fetchByteAt(uint16_t address) {
     return this->bus.fetchByteAt(address);
 }
 
 // TODO: As i said below, there's some instructions that recive data and others that recive adresses. For now i'll leave like this and, with time, i'll adjust
 // This function returns the clocks that every instruction costs
+// TODO: Remove all std::nullopt to their properly types
 int CPU::executeNextInstruction() {
     uint8_t opcode = this->fetchNextByte();
     uint8_t data;
@@ -215,112 +259,112 @@ int CPU::executeNextInstruction() {
 
     switch (opcode) {
         case ADC_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 2;
 		} 
               
         case ADC_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 3;
 		} 
                       
         case ADC_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 4;
 		} 
                       
         case ADC_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 4;
 		} 
                       
         case ADC_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case ADC_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case ADC_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 6;
 		} 
                       
         case ADC_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->ADC(data);
             return 5;
 		} // (+1 if page crossed)
                       
         case AND_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 2;
 		} 
                       
         case AND_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 3;
 		} 
                       
         case AND_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
 		} 
                       
         case AND_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
 		} 
                       
         case AND_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case AND_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case AND_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 6;
 		} 
                       
         case AND_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 5;
@@ -332,78 +376,78 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case ASL_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->ASL(addressToFetchData);
             return 5;
 		} 
                       
         case ASL_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->ASL(addressToFetchData);
             return 6;
 		} 
                       
         case ASL_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->ASL(addressToFetchData);
             return 6;
 		} 
                       
         case ASL_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->ASL(addressToFetchData);
             return 7;
 		} 
                       
         case BCC_RELATIVE : {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BCC(data);
             return 2 + result; // (+1 if branch succeeds+2 if to a new page)
          }
 
         case BCS_RELATIVE: { 
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BCS(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BEQ_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BEQ(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BIT_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->BIT(addressToFetchData);
             return 3;
 		} 
                       
         case BIT_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->BIT(addressToFetchData);
             return 4;
 		} 
                       
         case BMI_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BMI(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BNE_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BNE(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BPL_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BPL(data);
             return 2 + result;
@@ -415,14 +459,14 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case BVC_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BVC(data);
             return 2 + result;
 		} // (+1 if branch succeeds +2 if to a new page)
                       
         case BVS_RELATIVE: {
-            addressToFetchData = this->getNextAddress(RELATIVE);
+            addressToFetchData = this->getNextAddress(RELATIVE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             uint8_t result = this->BVS(data);
             return 2 + result;
@@ -449,123 +493,123 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case CMP_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 2;
 		} 
                       
         case CMP_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 3;
 		} 
                       
         case CMP_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 4;
 		} 
                       
         case CMP_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 4;
 		} 
                       
         case CMP_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case CMP_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case CMP_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 6;
 		} 
                       
         case CMP_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
             data = this->fetchByteAt(addressToFetchData);
             this->CMP(data);
             return 5;
 		} // (+1 if page crossed)
                       
         case CPX_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE); 
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
             return 2;
 		} 
                       
         case CPX_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
             return 3;
 		} 
                       
         case CPX_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE); 
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPX(data);
             return 4;
 		} 
                       
         case CPY_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE); 
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
             return 2;
 		} 
                       
         case CPY_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
             return 3;
 		} 
                       
         case CPY_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE); 
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt); 
  	 	 	data = this->fetchByteAt(addressToFetchData);
             this->CPY(data);
             return 4;
 		} 
                       
         case DEC_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->DEC(addressToFetchData);
             return 5;
 		} 
                       
         case DEC_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->DEC(addressToFetchData);
             return 6;
 		} 
                       
         case DEC_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->DEC(addressToFetchData);
             return 6;
 		} 
                       
         case DEC_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->DEC(addressToFetchData);
             return 7;
 		} 
@@ -581,81 +625,81 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case EOR_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 2;
 		} 
                       
         case EOR_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 3;
 		} 
                       
         case EOR_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 4;
 		} 
                       
         case EOR_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 4;
 		} 
                       
         case EOR_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case EOR_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case EOR_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 6;
 		} 
                       
         case EOR_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->EOR(data);
             return 5;
 		} // (+1 if page crossed)
                       
         case INC_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->INC(addressToFetchData);
             return 5;
 		} 
                       
         case INC_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->INC(addressToFetchData);
             return 6;
 		} 
                       
         case INC_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->INC(addressToFetchData);
             return 6;
 		} 
                       
         case INC_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->INC(addressToFetchData);
             return 7;
 		} 
@@ -671,127 +715,127 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case JMP_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->JMP(addressToFetchData);
             return 3;
 		} 
                       
         case JMP_INDIRECT: {
-            addressToFetchData = this->getNextAddress(INDIRECT);
+            addressToFetchData = this->getNextAddress(INDIRECT, std::nullopt);
             this->JMP(addressToFetchData);
             return 5;
 		} 
                       
         case JSR_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->JSR(addressToFetchData);
             return 6;
 		} 
                       
         case LDA_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
             this->LDA(addressToFetchData);
             return 2;
 		} 
                       
         case LDA_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->LDA(addressToFetchData);
             return 3;
 		} 
                       
         case LDA_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->LDA(addressToFetchData);
             return 4;
 		} 
                       
         case LDA_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->LDA(addressToFetchData);
             return 4;
 		} 
                       
         case LDA_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->LDA(addressToFetchData);
             return 4;
 		} // (+1 if page crossed)
                       
         case LDA_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
             this->LDA(addressToFetchData);
             return 4;
 		} // (+1 if page crossed)
                       
         case LDA_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
             this->LDA(addressToFetchData);
             return 6;
 		} 
                       
         case LDA_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
             this->LDA(addressToFetchData);
             return 5;
 		} // (+1 if page crossed)
                       
         case LDX_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
             this->LDX(addressToFetchData);
             return 2;
 		} 
                       
         case LDX_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->LDX(addressToFetchData);
             return 3;
 		} 
                       
         case LDX_ZERO_PAGE_Y: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_Y);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_Y, std::nullopt);
             this->LDX(addressToFetchData);
             return 4;
 		} 
                       
         case LDX_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->LDX(addressToFetchData);
             return 4;
 		} 
                       
         case LDX_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
             this->LDX(addressToFetchData);
             return 4;
 		} // (+1 if page crossed)
                       
         case LDY_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
             this->LDY(addressToFetchData);
             return 2;
 		} 
                       
         case LDY_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->LDY(addressToFetchData);
             return 3;
 		} 
                       
         case LDY_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->LDY(addressToFetchData);
             return 4;
 		} 
                       
         case LDY_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->LDY(addressToFetchData);
             return 4;
 		} 
                       
         case LDY_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->LDY(addressToFetchData);
             return 4;
 		} // (+1 if page crossed)
@@ -802,25 +846,25 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case LSR_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->LSR(addressToFetchData);
             return 5;
 		} 
                       
         case LSR_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->LSR(addressToFetchData);
             return 6;
 		} 
                       
         case LSR_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->LSR(addressToFetchData);
             return 6;
 		} 
                       
         case LSR_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->LSR(addressToFetchData);
             return 7;
 		} 
@@ -831,56 +875,56 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case ORA_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 2;
 		} 
                       
         case ORA_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 3;
 		} 
                       
         case ORA_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 4;
 		} 
                       
         case ORA_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 4;
 		} 
                       
         case ORA_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case ORA_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case ORA_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 6;
 		} 
                       
         case ORA_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->ORA(data);
             return 5;
@@ -912,25 +956,25 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case ROL_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->ROL(addressToFetchData);
             return 5;
 		} 
                       
         case ROL_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->ROL(addressToFetchData);
             return 6;
 		} 
                       
         case ROL_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->ROL(addressToFetchData);
             return 6;
 		} 
                       
         case ROL_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->ROL(addressToFetchData);
             return 7;
 		} 
@@ -941,25 +985,25 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case ROR_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->ROR(addressToFetchData);
             return 5;
 		} 
                       
         case ROR_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->ROR(addressToFetchData);
             return 6;
 		} 
                       
         case ROR_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->ROR(addressToFetchData);
             return 6;
 		} 
                       
         case ROR_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->ROR(addressToFetchData);
             return 7;
 		} 
@@ -975,56 +1019,56 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case SBC_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(IMMEDIATE);
+            addressToFetchData = this->getNextAddress(IMMEDIATE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 2;
 		} 
                       
         case SBC_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 3;
 		} 
                       
         case SBC_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 4;
 		} 
                       
         case SBC_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 4;
 		} 
                       
         case SBC_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case SBC_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 4;
 		} // (+1 if page crossed)
                       
         case SBC_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 6;
 		} 
                       
         case SBC_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
 			data = this->fetchByteAt(addressToFetchData);
             this->SBC(data);
             return 5;
@@ -1046,79 +1090,79 @@ int CPU::executeNextInstruction() {
 		} 
                       
         case STA_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->STA(addressToFetchData);
             return 3;
 		} 
                       
         case STA_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->STA(addressToFetchData);
             return 4;
 		} 
                       
         case STA_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->STA(addressToFetchData);
             return 4;
 		} 
                       
         case STA_ABSOLUTE_X: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_X);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_X, std::nullopt);
             this->STA(addressToFetchData);
             return 5;
 		} 
                       
         case STA_ABSOLUTE_Y: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE_Y);
+            addressToFetchData = this->getNextAddress(ABSOLUTE_Y, std::nullopt);
             this->STA(addressToFetchData);
             return 5;
 		} 
                       
         case STA_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(INDIRECT_X);
+            addressToFetchData = this->getNextAddress(INDIRECT_X, std::nullopt);
             this->STA(addressToFetchData);
             return 6;
 		} 
                       
         case STA_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(INDIRECT_Y);
+            addressToFetchData = this->getNextAddress(INDIRECT_Y, std::nullopt);
             this->STA(addressToFetchData);
             return 6;
 		} 
                       
         case STX_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->STX(addressToFetchData);
             return 3;
 		} 
                       
         case STX_ZERO_PAGE_Y: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_Y);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_Y, std::nullopt);
             this->STX(addressToFetchData);
             return 4;
 		} 
                       
         case STX_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->STX(addressToFetchData);
             return 4;
 		} 
                       
         case STY_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE, std::nullopt);
             this->STY(addressToFetchData);
             return 3;
 		} 
                       
         case STY_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ZERO_PAGE_X);
+            addressToFetchData = this->getNextAddress(ZERO_PAGE_X, std::nullopt);
             this->STY(addressToFetchData);
             return 4;
 		} 
                       
         case STY_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ABSOLUTE);
+            addressToFetchData = this->getNextAddress(ABSOLUTE, std::nullopt);
             this->STY(addressToFetchData);
             return 4;
 		} 

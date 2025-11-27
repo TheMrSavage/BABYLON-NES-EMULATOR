@@ -2,7 +2,8 @@
     #define CPU_6502
     
     // See P variable
-    #define P_FLAG_CARRY                0b00000001
+    #include <optional>
+#define P_FLAG_CARRY                0b00000001
     #define P_FLAG_ZERO                 0b00000010
     #define P_FLAG_INTERRUPT_DISABLE    0b00000100
     #define P_FLAG_DECIMAL              0b00001000
@@ -44,7 +45,7 @@
             uint8_t stackPop();
             void stackPush(uint8_t data);
 
-            uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM);
+            uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM, std::optional<INSTRUCTION_TYPE> instructionType);
             uint8_t fetchByteAt(uint16_t address);
             uint8_t fetchNextByte();
 
