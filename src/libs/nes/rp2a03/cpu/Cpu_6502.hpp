@@ -82,7 +82,7 @@
             void INX();
             void INY();
             void JMP(uint16_t data);
-            void JSR(uint16_t data);
+            void JSR();
             void LDA(uint16_t data);
             void LDX(uint16_t data);
             void LDY(uint16_t data);

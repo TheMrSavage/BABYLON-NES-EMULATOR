@@ -10,7 +10,7 @@
         NONE
     };
 
-    enum ADDRESSING_MODE_ENUM {
+    enum class ADDRESSING_MODE_ENUM {
         ABSOLUTE_X,
         ABSOLUTE,
         INDIRECT_X,
