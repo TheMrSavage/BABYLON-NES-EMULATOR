@@ -1566,6 +1566,9 @@ void CPU::EOR(uint8_t data){
 // "Adds one to the value held at a specified memory location setting the zero and negative flags as appropriate."
 void CPU::INC(uint16_t memoryAddress){
     uint8_t value = this->fetchByteAt(memoryAddress);
+    
+    this->writeByteAt(memoryAddress, value); // Dummy write
+
     value++;
     
     this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
