@@ -1740,6 +1740,9 @@ void CPU::PHP(){
 // Done
 // "Pulls an 8 bit value from the stack and into the accumulator. The zero and negative flags are set as appropriate."
 void CPU::PLA(){
+    this->fetchByteAt(this->pc); // Dummy read
+    this->fetchByteAt(0x0100 | this->sp); // Dummy read
+
     uint8_t value = this->stackPop();
        
     this->p &= ~(P_FLAG_NEGATIVE | P_FLAG_ZERO);
