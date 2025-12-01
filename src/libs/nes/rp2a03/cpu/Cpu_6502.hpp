@@ -3,7 +3,7 @@
     
     // See P variable
     #include <optional>
-#define P_FLAG_CARRY                0b00000001
+    #define P_FLAG_CARRY                0b00000001
     #define P_FLAG_ZERO                 0b00000010
     #define P_FLAG_INTERRUPT_DISABLE    0b00000100
     #define P_FLAG_DECIMAL              0b00001000
@@ -15,6 +15,13 @@
     #include <cstdint>
     #include <Bus.hpp>
     #include "instructions/InstructionsOpcodeEnum.hpp"
+    
+    
+    typedef struct GET_NEXT_ADDRESS_RETURN {
+        uint16_t address;
+        short extraCycle;
+    }GET_NEXT_ADDRESS_RETURN;
+    
     class CPU{
         private:
             Bus& bus;
@@ -44,8 +51,8 @@
             
             uint8_t stackPop();
             void stackPush(uint8_t data);
-
-            uint16_t getNextAddress(enum ADDRESSING_MODE_ENUM, std::optional<INSTRUCTION_TYPE> instructionType);
+            
+            GET_NEXT_ADDRESS_RETURN getNextAddress(enum ADDRESSING_MODE_ENUM, std::optional<INSTRUCTION_TYPE> instructionType);
             uint8_t fetchByteAt(uint16_t address);
             uint8_t fetchNextByte();
 
