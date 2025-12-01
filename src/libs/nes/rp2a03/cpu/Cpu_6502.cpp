@@ -216,6 +216,11 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode, std::optio
         // One interesting this: This don't have the same bug as indirect
         case ADDRESSING_MODE_ENUM::INDIRECT_Y : {
             bool pageCrossed;
+            INSTRUCTION_TYPE type = INSTRUCTION_TYPE::NONE;
+
+            if (instructionType.has_value()) {
+                type = instructionType.value();
+            }
 
             uint8_t zeroPageAdress = this->fetchNextByte(); 
             
@@ -224,13 +229,14 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode, std::optio
             
             pageCrossed = ((uint16_t)LSB + this->idY) > 0xFF; 
             LSB += this->idY;
+            
             address = (MSB << 8) | LSB;
             
-            if (pageCrossed) { // For cycle accuracy we need to fetch byte at "wrong" address while putting the carry in final address
-                this->fetchByteAt(address);
+            if (pageCrossed || instructionType != INSTRUCTION_TYPE::READONLY) this->fetchByteAt(address);
 
+            if (pageCrossed) {
                 MSB++;
-
+                
                 address = (MSB << 8) | LSB;
             }
 
@@ -315,28 +321,28 @@ int CPU::executeNextInstruction() {
 		} // (+1 if page crossed)
                       
         case AND_IMMEDIATE: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::IMMEDIATE, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::IMMEDIATE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 2;
 		} 
                       
         case AND_ZERO_PAGE: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ZERO_PAGE, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ZERO_PAGE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 3;
 		} 
                       
         case AND_ZERO_PAGE_X: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ZERO_PAGE_X, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ZERO_PAGE_X, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
 		} 
                       
         case AND_ABSOLUTE: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ABSOLUTE, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::ABSOLUTE, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 4;
@@ -357,14 +363,14 @@ int CPU::executeNextInstruction() {
 		} // (+1 if page crossed)
                       
         case AND_INDIRECT_X: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::INDIRECT_X, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::INDIRECT_X, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 6;
 		} 
                       
         case AND_INDIRECT_Y: {
-            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::INDIRECT_Y, std::nullopt);
+            addressToFetchData = this->getNextAddress(ADDRESSING_MODE_ENUM::INDIRECT_Y, INSTRUCTION_TYPE::READONLY);
             data = this->fetchByteAt(addressToFetchData);
             this->AND(data);
             return 5;
