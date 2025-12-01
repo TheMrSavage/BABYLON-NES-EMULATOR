@@ -95,7 +95,11 @@ uint16_t CPU::getNextAddress(enum ADDRESSING_MODE_ENUM adressingMode, std::optio
         }
         
         case ADDRESSING_MODE_ENUM::ZERO_PAGE_Y : {
-            address = (this->fetchNextByte() + this->idY) & 0xFF;
+            uint8_t toFetch = this->fetchNextByte();
+            
+            this->fetchByteAt(toFetch); // Dummy read
+
+            address = (toFetch + this->idY) & 0xFF;
             break;
         }
         
