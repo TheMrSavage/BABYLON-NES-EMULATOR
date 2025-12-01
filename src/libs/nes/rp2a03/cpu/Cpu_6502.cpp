@@ -1507,6 +1507,9 @@ void CPU::CPY(uint8_t data){
 // "Subtracts one from the value held at a specified memory location setting the zero and negative flags as appropriate."
 void CPU::DEC(uint16_t memoryAddress){
     uint8_t value = this->fetchByteAt(memoryAddress);
+    
+    this->writeByteAt(memoryAddress, value); // Dummy write
+
     value--;
     
     this->p &= ~(P_FLAG_ZERO | P_FLAG_NEGATIVE);
