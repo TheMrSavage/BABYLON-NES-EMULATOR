@@ -1669,9 +1669,12 @@ void CPU::LDY(uint16_t memoryAddress){
 
 // Done
 // "Each of the bits in A or M is shift one place to the right. The bit that was in bit 0 is shifted into the carry flag. Bit 7 is set to zero."
+// TODO: Please remove 0b01111100
 void CPU::LSR(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
 
+    this->writeByteAt(memoryAddress, data); // Dummy write
+    
     this->p &= 0b01111100;
     this->p |= (data & P_FLAG_CARRY);
 
