@@ -1873,6 +1873,9 @@ void CPU::RTI(){
 (JSR will first push the high-byte of the return address [PC+2] onto the stack, then the low-byte. The stack will then contain, seen from the bottom or from the most recently added byte, [PC+2]-L [PC+2]-H.)
  */
 void CPU::RTS(){
+    this->fetchByteAt(this->pc); // Dummy read
+    
+    this->fetchByteAt(0x0100 | this->sp); // Another dummy read
     uint8_t LSB = this->stackPop();
     uint8_t MSB = this->stackPop();
 
