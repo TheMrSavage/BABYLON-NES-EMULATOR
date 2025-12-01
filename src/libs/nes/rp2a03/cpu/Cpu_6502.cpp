@@ -1724,6 +1724,8 @@ void CPU::ORA(uint8_t data){
 // Done
 // "Pushes a copy of the accumulator on to the stack."
 void CPU::PHA(){
+    this->fetchByteAt(this->pc); // Dummy read
+
     this->stackPush(this->acc);
 }
 
