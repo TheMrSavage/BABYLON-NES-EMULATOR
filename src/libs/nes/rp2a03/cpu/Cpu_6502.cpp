@@ -1760,6 +1760,8 @@ void CPU::PLP(){
 // "Move each of the bits in either A or M one place to the left. Bit 0 is filled with the current value of the carry flag whilst the old bit 7 becomes the new carry flag value."
 void CPU::ROL(uint16_t memoryAddress){
     uint8_t data = this->fetchByteAt(memoryAddress);
+    
+    this->writeByteAt(memoryAddress, data); // Dummy write
 
     uint8_t newCarryFlag = (data & P_FLAG_NEGATIVE) >> 7;
 
