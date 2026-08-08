@@ -19,7 +19,15 @@ add_subdirectory(cmake/libs)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
-if (DEFINED BUILD_TESTS)
+add_subdirectory(cmake/options)
+
+# TODO: Find a better way to setup options...
+if (DEV_MODE)
+    add_compile_options(-g3 -Og -fno-omit-frame-pointer)
+endif()
+
+# TODO: Find a better way to separate different builds...
+if (BUILD_TESTS)
     add_executable(Tests src/tests/tests.cpp)
     add_subdirectory(cmake/dependencies/json)
     target_include_directories(Tests PUBLIC src/libs)
@@ -29,4 +37,3 @@ else ()
     target_include_directories(BABYLON PUBLIC src/libs)
     target_link_libraries(BABYLON PRIVATE Controller)
 endif()
-
