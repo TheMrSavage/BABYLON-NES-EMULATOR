@@ -15,6 +15,10 @@
 #include <bus/Bus.hpp>
 #include <Bus.hpp>
 
+// TODO: Refactor this whole file to use a better TDD solution (to remove dependency on SingleStepTests/65x02 project *and* json one)
+// TODO: Create a general class "Tests" which contains tests for each individual NES component, respecting the logical strucuture, like:
+//  Testes contains RP2A03Tests contains APUTests and CPUTests
+
 inline std::string BusOperationTypeString(BUS_OPERATION_TYPES_ENUM x) {
     return x == BUS_OPERATION_TYPES_ENUM::BUS_WRITE ? "write" : "read";
 }
@@ -171,8 +175,18 @@ void CPU6502Test(const std::string& testsPath) {
     std::set<std::string> invalidOpcodes;
     
     for (const auto& entry : std::filesystem::directory_iterator(testsPath)) {
-        const std::string& filePath = entry.path();
+        const std::filesystem::path& path = entry.path();
+        const std::string& filePath = path; // Cast filesystem::path to string
+        
+        if (std::filesystem::is_directory(path)) {
+            std::cout << "[-] '" << filePath << "' is directory. Skipping..." << std::endl;
+            continue;
+        }
 
+        if (path.extension() != ".json") {
+            std::cout << "[-] Non json file '" << filePath << "'. Skipping..." << std::endl;
+            continue;
+        }
         std::cout << "[+] Current test file: " << filePath << std::endl;
 
         std::fstream testFile(entry.path());
