@@ -21,19 +21,27 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
 add_subdirectory(cmake/options)
 
-# TODO: Find a better way to setup options...
-if (DEV_MODE)
-    add_compile_options(-g3 -Og -fno-omit-frame-pointer)
-endif()
-
 # TODO: Find a better way to separate different builds...
+# TODO: Create an static build for both options
 if (BUILD_TESTS)
     add_executable(Tests src/tests/tests.cpp)
     add_subdirectory(cmake/dependencies/json)
     target_include_directories(Tests PUBLIC src/libs)
     target_link_libraries(Tests PRIVATE Cpu)
+
+    if (DEV_MODE) # Note: You can't use Valgrid with this build
+        target_compile_options(Tests PRIVATE -g3 -Og -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=address)
+        target_link_options(Tests PRIVATE -fsanitize=undefined -fsanitize=address)
+    endif()
 else ()
     add_executable(BABYLON src/main.cpp)
+
     target_include_directories(BABYLON PUBLIC src/libs)
     target_link_libraries(BABYLON PRIVATE Controller)
+
+    # TODO: Find a better way to setup options...
+    if (DEV_MODE) # Note: You can't use Valgrid with this build
+        target_compile_options(BABYLON PRIVATE -g3 -Og -fno-omit-frame-pointer -fsanitize=undefined -fsanitize=address)
+        target_link_options(BABYLON PRIVATE -fsanitize=undefined -fsanitize=address)
+    endif()
 endif()
