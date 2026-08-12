@@ -9,6 +9,9 @@ Just a list of stuff to do to make things simpler and more organized
 - [x] Put `AddressSanitizer` and `UndefinedBehaviorSanitizer` flags in `CMake` workflow
 - [ ] Refactor the test suite for use TDD properly
 - [ ] Create Windows compilation workflow
+- [ ] Write documentation for *each* emulator component
+- [ ] Write a proper `README`
+- [ ] Write an CI/CD for each relevant build option (with tests!)
 
 ## Features
 
