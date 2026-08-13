@@ -2,15 +2,14 @@
 #include "events.hpp"
 #include "imgui.h"
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #define OnOffString(x) \
     (x) ? ("On") : ("Off")
 
 DebuggerScreen::DebuggerScreen(SDL_Renderer * interface_renderer,
-                    std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool) {
-
-}
+                    std::queue<event_return>& event_pool) : Screen(interface_renderer, event_pool) {}
 
 // TODO: Remove the memory reference 
 // TODO: Create a new schema for BUS 
@@ -23,15 +22,16 @@ void DebuggerScreen::setCpuDebuggerInfo(
                 const uint8_t&  cpuP,
                 const std::vector<uint8_t>& memory
                 ) {
-    this->cpuDebuggerInfo = new CpuDebuggerInfo{
-            cpuPc,
-            cpuSp,
-            cpuAcc,
-            cpuIdX,
-            cpuIdY,
-            cpuP,
-            memory
-    };
+    this->cpuDebuggerInfo = std::make_unique<CpuDebuggerInfo>(CpuDebuggerInfo{ 
+             cpuPc,
+             cpuSp,
+             cpuAcc,
+             cpuIdX,
+             cpuIdY,
+             cpuP,
+             memory
+            } 
+        );
 }
 
 void DebuggerScreen::show(){

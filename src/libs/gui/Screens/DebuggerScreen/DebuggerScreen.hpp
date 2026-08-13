@@ -4,6 +4,7 @@
     #include "../Screen.hpp"
     #include "SDL3/SDL_render.h"
     #include <cstdint>
+#include <memory>
     #include <queue>
     #include <string>
     #include <unordered_map>
@@ -22,7 +23,7 @@
               const std::vector<uint8_t>& cpuMemory;
             }CpuDebuggerInfo;
             
-            CpuDebuggerInfo * cpuDebuggerInfo = nullptr;
+            std::unique_ptr<CpuDebuggerInfo> cpuDebuggerInfo;
 
             void openCPUDebugger();
             void openAPUDebugger();
