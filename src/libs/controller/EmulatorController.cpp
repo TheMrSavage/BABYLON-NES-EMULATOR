@@ -1,26 +1,23 @@
 #include "EmulatorController.hpp"
 #include "events.hpp"
+#include "gui/Interface.hpp"
 #include "nes/rp2a03/cpu/Cpu_6502.hpp"
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <thread>
 #include <vector>
 #include <bus/Bus.hpp>
 
-EmulatorController::EmulatorController() {
-    // this->nes = new Nes;
-}
+EmulatorController::EmulatorController() {}
 
-// TODO: Put smart pointers here too...
-EmulatorController::~EmulatorController() {
-    delete this->interface; 
-    delete this->nes;
-}
+// DONE 
+EmulatorController::~EmulatorController() {}
 
 void EmulatorController::start() {
-    this->interface = new Interface(this->interface_event_pool);
+    this->interface = std::make_unique<Interface>(this->interface_event_pool);
     
     while (true) {
         while (!this->interface_event_pool.empty()) {
@@ -112,10 +109,18 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
     std::vector<uint8_t> mockedMemory(0xFFFF + 1); // 0 to 0xFFFF
     
     Bus bus;
+    
+    bus.setMemory(mockedMemory);
 
-    bus.loadMemory(room);
+    if (bus.loadMemory(room)) {
+        std::cout << "[+] ROM Loaded!";
+    }
+    else {
+        std::cout << "[-] Error while reading ROM!";
+        return;
+    }
 
-    // std::copy(room.begin(), room.end(), mockedMemory.begin());
+    const std::vector<uint8_t>& busMemory = bus.returnMemoryCopy();
     
     CPU cpu(bus);
     
@@ -126,7 +131,7 @@ void EmulatorController::mockCPU(const std::vector<uint8_t>& room) {
         cpu.returnIdX(),
         cpu.returnIdY(),
         cpu.returnP(),
-        mockedMemory
+        busMemory
     );
     
     int cycles = 0;

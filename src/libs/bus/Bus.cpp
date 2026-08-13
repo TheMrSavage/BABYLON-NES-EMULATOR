@@ -2,12 +2,10 @@
 #include <cstdint>
 #include <iostream>
 #include <ostream>
+#include <vector>
 
-// TODO: After debuging the Bus read-write for 6502 tests, change the value to MEMORY_SIZE 
-Bus::Bus() : memory(0x10000)  {
-
-}
-
+// DONE
+Bus::Bus() : memory(MEMORY_SIZE){}
 
 std::ostream& operator<<(std::ostream& os, const BUS_OPERATION& operation) {
     return os << "(" << (unsigned int)operation.address << ", " << (unsigned int)operation.value << ", " << (operation.type == BUS_OPERATION_TYPES_ENUM::BUS_READ ? "\"read\"" : "\"write\"") << ")";  
@@ -88,9 +86,19 @@ uint8_t Bus::fetchByteAt(uint16_t address) {
 
 // Return true if memory was loaded
 bool Bus::loadMemory(const std::vector<uint8_t>& room) {
-    // if (room.size() > this->MEMORY_SIZE) return false;
+    // if (room.size() > this->MEMORY_SIZE) return false; // TODO: After done the Bus logic put this restriction again or modified to make sense with new logic...
 
     std::copy(room.begin(), room.end(), this->memory.begin());
     
     return true;
+}
+
+void Bus::setMemory(std::vector<uint8_t>& memory) {
+    this->memory = memory;
+}
+
+std::vector<uint8_t>& Bus::returnMemoryCopy() {
+    std::vector<uint8_t>& memoryCopy(this->memory);
+
+    return memoryCopy;
 }

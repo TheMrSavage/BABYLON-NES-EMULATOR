@@ -31,6 +31,10 @@
             void writeByteAt(uint16_t address, uint8_t data);
             uint8_t fetchByteAt(uint16_t address);
             
+            void setMemory(std::vector<uint8_t>& memory); // Useful for mocks
+
+            std::vector<uint8_t>& returnMemoryCopy();
+
             bool loadMemory(const std::vector<uint8_t>& room);
             void setDebugMode();
             

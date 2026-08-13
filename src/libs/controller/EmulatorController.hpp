@@ -1,13 +1,14 @@
 #ifndef EMULATOR_CONTROLLER
     #define EMULATOR_CONTROLLER
-    #include <nes/Nes.hpp>
+    #include <memory>
+#include <nes/Nes.hpp>
     #include <gui/Interface.hpp>
     #include <events.hpp>    
 
     class EmulatorController {
         private:
-            Interface * interface = nullptr;
-            Nes * nes = nullptr;
+            std::unique_ptr<Interface> interface;
+            std::unique_ptr<Nes> nes;
 
             std::queue<event_return> interface_event_pool;
             void handleRoom(const std::vector<unsigned char>& room);
