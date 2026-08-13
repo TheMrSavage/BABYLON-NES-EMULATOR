@@ -27,3 +27,5 @@ Just a list of stuff to do to make things simpler and more organized
 
 - [ ] Implement save-state logic
 - [ ] Implement joystick compatibility
+- [ ] Implement 6502 disassemble
+
